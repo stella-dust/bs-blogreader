@@ -62,11 +62,15 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
     setTestMessage('正在测试连接...')
 
     try {
+      // Use FastAPI backend for local development, Supabase for production
       const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
         ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
-        : 'http://localhost:54321'
+        : 'http://localhost:8001'
 
-      const response = await fetch(`${API_BASE_URL}/functions/v1/test-llm-config`, {
+      const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      const testEndpoint = isLocalDev ? '/api/test-llm-config' : '/functions/v1/test-llm-config'
+
+      const response = await fetch(`${API_BASE_URL}${testEndpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

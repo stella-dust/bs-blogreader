@@ -94,16 +94,25 @@ function App() {
 请直接输出解读内容，不需要额外的格式或前缀。`
   )
 
+  // Use FastAPI backend for local development, Supabase for production
   const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
     ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
-    : 'http://localhost:54321'
+    : 'http://localhost:8001'
+
+  // Use different endpoints based on environment
+  const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+  const API_ENDPOINTS = {
+    fetchContent: isLocalDev ? '/api/fetch-content' : '/functions/v1/fetch-content',
+    process: isLocalDev ? '/api/process' : '/functions/v1/process',
+    testConfig: isLocalDev ? '/api/test-llm-config' : '/functions/v1/test-llm-config'
+  }
 
   const handleFetchContent = async () => {
     if (!url.trim()) return
 
     setIsFetching(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/functions/v1/fetch-content`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.fetchContent}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +139,7 @@ function App() {
 
     setIsTranslating(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/functions/v1/process`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +173,7 @@ function App() {
 
     setIsInterpreting(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/functions/v1/process`, {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
