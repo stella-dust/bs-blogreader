@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build outputs
+frontend/dist/
+frontend/build/
+backend/build/
+
+# Environment files
+.env
+.env.local
+.env.production
+.venv/
+venv/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Claude settings (local only)
+.claude/
+
+# Coverage reports
+coverage/
+.coverage
+.nyc_output
