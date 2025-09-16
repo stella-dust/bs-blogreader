@@ -43,3 +43,9 @@ temp/
 coverage/
 .coverage
 .nyc_output
+
+# Supabase
+.branches
+.temp
+supabase/.branches
+supabase/.temp

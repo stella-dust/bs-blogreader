@@ -35,18 +35,28 @@ bs-blogreader/
 │   │   │   ├── ContentPanel.tsx     # 内容显示面板
 │   │   │   ├── HistoryDropdown.tsx  # 历史记录下拉菜单
 │   │   │   ├── LoadingSpinner.tsx   # 加载动画组件
-│   │   │   └── PromptDialog.tsx     # 提示词设置弹窗
+│   │   │   ├── PromptDialog.tsx     # 提示词设置弹窗
+│   │   │   └── RichContentViewer.tsx # 富文本内容查看器
 │   │   ├── lib/            # 工具函数
-│   │   ├── services/       # API 服务
 │   │   ├── App.tsx         # 主应用组件
 │   │   ├── main.tsx        # 应用入口
 │   │   └── index.css       # 全局样式
 │   ├── public/             # 静态资源
 │   ├── package.json        # 前端依赖配置
 │   ├── tailwind.config.js  # Tailwind CSS 配置
-│   └── vite.config.ts      # Vite 构建配置
-├── backend/                 # FastAPI Python 后端
-│   ├── main.py             # 后端主文件
+│   ├── vite.config.ts      # Vite 构建配置
+│   └── wrangler.toml       # Cloudflare Pages 配置
+├── supabase/               # Supabase Edge Functions
+│   ├── functions/          # Edge Functions
+│   │   ├── fetch-content/  # 网页内容抓取
+│   │   ├── process/        # AI 内容处理
+│   │   ├── test-llm-config/ # LLM 配置测试
+│   │   └── health/         # 健康检查
+│   ├── migrations/         # 数据库迁移文件
+│   └── config.toml         # Supabase 配置
+├── backend/                # 传统后端 (Docker 部署用)
+│   ├── llm_main.py         # 多 LLM 支持的后端
+│   ├── simple_main.py      # 简化版后端
 │   └── requirements.txt    # Python 依赖
 └── README.md               # 项目文档
 ```
@@ -61,16 +71,31 @@ bs-blogreader/
 - **Markdown**: react-markdown + remark-gfm
 
 ### 后端
-- **框架**: FastAPI
+- **主要**: Supabase Edge Functions (TypeScript + Deno)
+- **网页解析**: Deno DOM + Fetch API
 - **AI 服务**: 多 LLM 支持 (DeepSeek、OpenAI、Claude、Ollama、LM Studio)
-- **网页解析**: BeautifulSoup4 + requests
-- **跨域**: CORS 中间件
+- **备选**: FastAPI (Docker 部署)
+- **跨域**: 内置 CORS 支持
 
 ## 📦 安装部署
 
 ### 环境要求
+
+**Supabase 部署 (推荐)**:
 - Node.js 16+
+- Supabase CLI
+
+**本地开发**:
+- Node.js 16+
+- Supabase CLI
+- Docker (可选)
+
+**Docker 部署**:
+- Docker
+- Docker Compose
 - Python 3.8+
+
+**AI 服务**:
 - API Key (DeepSeek/OpenAI/Claude) 或本地 LLM (Ollama/LM Studio)
 
 ### 1. 克隆项目
@@ -110,24 +135,25 @@ npm run dev
 
 ## 🌐 在线部署
 
-### Cloudflare Pages + Railway 部署
+### Cloudflare Pages + Supabase 部署
 
-项目支持分离式部署：前端部署到 Cloudflare Pages，后端部署到 Railway。
+项目支持分离式部署：前端部署到 Cloudflare Pages，后端使用 Supabase Edge Functions。
 
 **详细部署指南**: 查看 [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 #### 快速部署步骤
 
-1. **后端部署 (Railway)**:
-   - Fork 本项目到您的 GitHub
-   - 在 [Railway](https://railway.app/) 连接 GitHub 仓库
-   - 自动识别 `railway.toml` 配置并部署
+1. **后端部署 (Supabase)**:
+   - 在 [Supabase](https://app.supabase.com/) 创建新项目
+   - 安装 Supabase CLI: `npm install -g @supabase/cli`
+   - 连接项目: `supabase link --project-ref your-project-id`
+   - 部署函数: `supabase functions deploy`
 
 2. **前端部署 (Cloudflare Pages)**:
-   - 在 [Cloudflare Pages](https://pages.cloudflare.com/) 连接同一仓库
+   - 在 [Cloudflare Pages](https://pages.cloudflare.com/) 连接 GitHub 仓库
    - 设置构建命令: `cd frontend && npm install && npm run build`
    - 设置输出目录: `frontend/dist`
-   - 配置环境变量 `VITE_API_URL` 指向 Railway 后端地址
+   - 配置环境变量 `VITE_SUPABASE_URL` 指向 Supabase 项目地址
 
 3. **访问演示**: 部署完成后即可访问在线版本
 

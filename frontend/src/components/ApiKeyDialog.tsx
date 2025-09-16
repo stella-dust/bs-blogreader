@@ -62,7 +62,11 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
     setTestMessage('正在测试连接...')
 
     try {
-      const response = await fetch('/api/test-llm-config', {
+      const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+        ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
+        : 'http://localhost:54321'
+
+      const response = await fetch(`${API_BASE_URL}/functions/v1/test-llm-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

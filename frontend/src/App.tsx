@@ -95,15 +95,15 @@ function App() {
   )
 
   const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-    ? (import.meta.env.VITE_API_URL || window.location.origin.replace(window.location.port, '8001'))
-    : 'http://localhost:8001'
+    ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
+    : 'http://localhost:54321'
 
   const handleFetchContent = async () => {
     if (!url.trim()) return
 
     setIsFetching(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/api/fetch-content`, {
+      const response = await fetch(`${API_BASE_URL}/functions/v1/fetch-content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ function App() {
 
     setIsTranslating(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/api/process`, {
+      const response = await fetch(`${API_BASE_URL}/functions/v1/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -164,7 +164,7 @@ function App() {
 
     setIsInterpreting(true)
     try {
-      const response = await fetch(`${API_BASE_URL}/api/process`, {
+      const response = await fetch(`${API_BASE_URL}/functions/v1/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
