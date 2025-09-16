@@ -1,0 +1,9 @@
+name = "bs-blogreader"
+compatibility_date = "2023-10-30"
+
+[build]
+command = "npm run build"
+cwd = "."
+
+[[pages_build_output_dir]]
+dir = "dist"

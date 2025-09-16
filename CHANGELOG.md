@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.1.1] - 2025-01-16
+
+### Online Demo Features
+- 🌐 **在线演示部署**: 支持 Cloudflare Pages + Railway 在线部署
+- 🔗 **GitHub 链接**: 导航栏添加项目 GitHub 仓库链接
+- 🔒 **隐私保护**: 强化用户 API 密钥隐私保护说明
+- 📋 **部署文档**: 完整的在线部署指南和配置说明
+- 🎯 **演示优化**: 针对在线演示优化用户体验和安全提示
+
+### Technical Improvements
+- ⚙️ **动态 API**: 支持根据部署环境自动配置 API 端点
+- 🚀 **部署配置**: 添加 `wrangler.toml` 和 `railway.toml` 配置
+- 📝 **文档完善**: 新增 `DEPLOYMENT.md` 详细部署指南
+
 ## [v0.1.0] - 2025-01-16
 
 ### Features

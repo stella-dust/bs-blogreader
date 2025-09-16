@@ -16,5 +16,8 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:8001'
     }
+  },
+  define: {
+    __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001')
   }
 })

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Search, FileText, History, Settings, Key, Clock } from 'lucide-react'
+import { Search, FileText, History, Settings, Key, Clock, Github, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -94,12 +94,16 @@ function App() {
 请直接输出解读内容，不需要额外的格式或前缀。`
   )
 
+  const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? (import.meta.env.VITE_API_URL || window.location.origin.replace(window.location.port, '8001'))
+    : 'http://localhost:8001'
+
   const handleFetchContent = async () => {
     if (!url.trim()) return
 
     setIsFetching(true)
     try {
-      const response = await fetch('/api/fetch-content', {
+      const response = await fetch(`${API_BASE_URL}/api/fetch-content`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +130,7 @@ function App() {
 
     setIsTranslating(true)
     try {
-      const response = await fetch('/api/process', {
+      const response = await fetch(`${API_BASE_URL}/api/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +164,7 @@ function App() {
 
     setIsInterpreting(true)
     try {
-      const response = await fetch('/api/process', {
+      const response = await fetch(`${API_BASE_URL}/api/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,6 +220,16 @@ function App() {
           </div>
 
           <div className="flex items-center space-x-2 relative">
+            <a
+              href="https://github.com/stella-dust/bs-blogreader"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              <Github className="h-4 w-4" />
+              <span>GitHub</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
             <Button
               variant="ghost"
               size="sm"
@@ -285,7 +299,7 @@ ${item.interpretation || ''}
           <div className="flex items-center space-x-4">
             <div className="flex-1">
               <Input
-                placeholder="输入URL，例如：https://www.anthropic.com/engineering/writing-tools-for-agents"
+                placeholder="输入URL，例如：https://www.anthropic.com/engineering/writing-tools-for-agents （演示版本，请先配置您的AI API密钥）"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="text-base"

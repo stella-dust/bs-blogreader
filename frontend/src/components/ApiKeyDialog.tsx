@@ -98,6 +98,17 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
             <Key className="h-4 w-4" />
             LLM 配置
           </DialogTitle>
+          <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <div className="text-sm text-blue-800">
+              <strong>🔒 隐私保护说明：</strong>
+              <ul className="mt-1 ml-4 list-disc">
+                <li>此演示版本仅为功能展示</li>
+                <li>您的API密钥仅储存在本地浏览器中</li>
+                <li>所有API调用直接连接到相应的AI服务商</li>
+                <li>我们不会收集或存储您的密钥信息</li>
+              </ul>
+            </div>
+          </div>
         </DialogHeader>
         <div className="space-y-4">
           <div>
