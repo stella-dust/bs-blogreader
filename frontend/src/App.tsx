@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Search, FileText, History, Settings, Key, Clock, Github, ExternalLink } from 'lucide-react'
+import { Search, FileText, History, Settings, Key, Clock, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -220,16 +220,6 @@ function App() {
           </div>
 
           <div className="flex items-center space-x-2 relative">
-            <a
-              href="https://github.com/stella-dust/bs-blogreader"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <Github className="h-4 w-4" />
-              <span>GitHub</span>
-              <ExternalLink className="h-3 w-3" />
-            </a>
             <Button
               variant="ghost"
               size="sm"
@@ -244,6 +234,19 @@ function App() {
               onClick={() => setShowApiDialog(true)}
             >
               <Key className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+            >
+              <a
+                href="https://github.com/stella-dust/bs-blogreader"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-4 w-4" />
+              </a>
             </Button>
 
             <HistoryDropdown
