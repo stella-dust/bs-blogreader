@@ -11,11 +11,10 @@ frontend/dist/
 frontend/build/
 backend/build/
 
-# Environment files
-.env
+# Environment files with sensitive data
 .env.local
 .env.production
-!.env.proxy
+.env.proxy
 .venv/
 venv/
 
