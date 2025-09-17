@@ -134,12 +134,10 @@ function App() {
     }
   }
 
-  const handleTranslate = async () => {
-    const requiresApiKey = !['ollama', 'lmstudio'].includes(llmConfig.type)
-    if (!contentData || (requiresApiKey && !llmConfig.apiKey)) return
-
-    setIsTranslating(true)
-    try {
+  // 分块处理长文本翻译
+  const processInChunks = async (content: string, prompt: string, chunkSize = 1500) => {
+    if (content.length <= chunkSize) {
+      // 如果内容不长，直接处理
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
@@ -147,20 +145,73 @@ function App() {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({
-          content: contentData.content,
-          prompt: translationPrompt,
+          content: content,
+          prompt: prompt,
+          llm_config: llmConfig
+        }),
+      })
+      if (!response.ok) throw new Error('Translation failed')
+      const data = await response.json()
+      return data.result
+    }
+
+    // 分块处理
+    const chunks = []
+    for (let i = 0; i < content.length; i += chunkSize) {
+      chunks.push(content.slice(i, i + chunkSize))
+    }
+
+    const results = []
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkPrompt = i === 0
+        ? prompt
+        : `继续翻译以下内容，保持与前面部分的连贯性和风格一致：`
+
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
+        },
+        body: JSON.stringify({
+          content: chunks[i],
+          prompt: chunkPrompt,
           llm_config: llmConfig
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Translation failed')
+        throw new Error(`翻译失败：第 ${i + 1}/${chunks.length} 部分`)
       }
 
       const data = await response.json()
+      results.push(data.result)
+
+      // 实时更新显示进度
       setProcessedData(prev => ({
         ...prev,
-        translation: data.result
+        translation: results.join('\n\n') + (i < chunks.length - 1 ? '\n\n[正在翻译剩余部分...]' : '')
+      }))
+
+      // 添加短暂延迟避免请求过快
+      if (i < chunks.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    }
+
+    return results.join('\n\n')
+  }
+
+  const handleTranslate = async () => {
+    const requiresApiKey = !['ollama', 'lmstudio'].includes(llmConfig.type)
+    if (!contentData || (requiresApiKey && !llmConfig.apiKey)) return
+
+    setIsTranslating(true)
+    try {
+      const result = await processInChunks(contentData.content, translationPrompt)
+      setProcessedData(prev => ({
+        ...prev,
+        translation: result
       }))
     } catch (error) {
       console.error('Translation failed:', error)
@@ -169,12 +220,10 @@ function App() {
     }
   }
 
-  const handleInterpret = async () => {
-    const requiresApiKey = !['ollama', 'lmstudio'].includes(llmConfig.type)
-    if (!contentData || (requiresApiKey && !llmConfig.apiKey)) return
-
-    setIsInterpreting(true)
-    try {
+  // 专门的解读分块处理函数
+  const processInterpretInChunks = async (content: string, prompt: string, chunkSize = 2000) => {
+    if (content.length <= chunkSize) {
+      // 如果内容不长，直接处理
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
@@ -182,20 +231,71 @@ function App() {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({
-          content: contentData.content,
-          prompt: interpretationPrompt,
+          content: content,
+          prompt: prompt,
+          llm_config: llmConfig
+        }),
+      })
+      if (!response.ok) throw new Error('Interpretation failed')
+      const data = await response.json()
+      return data.result
+    }
+
+    // 对于解读，我们使用更大的块，并且每块都基于原始prompt
+    const chunks = []
+    for (let i = 0; i < content.length; i += chunkSize) {
+      chunks.push(content.slice(i, i + chunkSize))
+    }
+
+    const results = []
+    for (let i = 0; i < chunks.length; i++) {
+      const chunkPrompt = `${prompt}\n\n请针对以下内容进行分析（这是第${i + 1}/${chunks.length}部分）：`
+
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
+        },
+        body: JSON.stringify({
+          content: chunks[i],
+          prompt: chunkPrompt,
           llm_config: llmConfig
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Interpretation failed')
+        throw new Error(`解读失败：第 ${i + 1}/${chunks.length} 部分`)
       }
 
       const data = await response.json()
+      results.push(`## 第${i + 1}部分解读\n\n${data.result}`)
+
+      // 实时更新显示进度
       setProcessedData(prev => ({
         ...prev,
-        interpretation: data.result
+        interpretation: results.join('\n\n---\n\n') + (i < chunks.length - 1 ? '\n\n[正在解读剩余部分...]' : '')
+      }))
+
+      // 添加短暂延迟避免请求过快
+      if (i < chunks.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    }
+
+    return results.join('\n\n---\n\n')
+  }
+
+  const handleInterpret = async () => {
+    const requiresApiKey = !['ollama', 'lmstudio'].includes(llmConfig.type)
+    if (!contentData || (requiresApiKey && !llmConfig.apiKey)) return
+
+    setIsInterpreting(true)
+    try {
+      const result = await processInterpretInChunks(contentData.content, interpretationPrompt)
+      setProcessedData(prev => ({
+        ...prev,
+        interpretation: result
       }))
     } catch (error) {
       console.error('Interpretation failed:', error)
