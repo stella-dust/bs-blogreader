@@ -140,11 +140,11 @@ function App() {
 
     setIsTranslating(true)
     try {
-      // 创建超时控制器 - 2分钟超时
+      // 创建超时控制器 - 5分钟超时
       const controller = new AbortController()
       const timeoutId = setTimeout(() => {
         controller.abort()
-      }, 120000) // 120秒
+      }, 300000) // 300秒(5分钟)
 
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
@@ -188,11 +188,11 @@ function App() {
 
     setIsInterpreting(true)
     try {
-      // 创建超时控制器 - 2分钟超时
+      // 创建超时控制器 - 5分钟超时
       const controller = new AbortController()
       const timeoutId = setTimeout(() => {
         controller.abort()
-      }, 120000) // 120秒
+      }, 300000) // 300秒(5分钟)
 
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
