@@ -161,7 +161,7 @@ function App() {
       chunks.push(content.slice(i, i + chunkSize))
     }
 
-    const results = []
+    const results: string[] = []
     for (let i = 0; i < chunks.length; i++) {
       const chunkPrompt = i === 0
         ? prompt
@@ -247,7 +247,7 @@ function App() {
       chunks.push(content.slice(i, i + chunkSize))
     }
 
-    const results = []
+    const results: string[] = []
     for (let i = 0; i < chunks.length; i++) {
       const chunkPrompt = `${prompt}\n\n请针对以下内容进行分析（这是第${i + 1}/${chunks.length}部分）：`
 
