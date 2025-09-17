@@ -4,8 +4,6 @@ project_id = "bs-blogreader"
 
 [functions]
 # Edge Functions configuration
-# Timeout for function execution (in seconds)
-timeout = 300
 
 [api]
 # Port to use for the API URL.
