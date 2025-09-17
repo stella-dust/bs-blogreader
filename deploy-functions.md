@@ -4,7 +4,7 @@
 
 ## 方法1：通过 Supabase Dashboard 手动创建
 
-1. 访问你的项目：https://supabase.com/dashboard/project/oqicgfaczdmrdoglkqzi
+1. 访问你的项目：https://supabase.com/dashboard/project/YOUR_PROJECT_REF
 2. 点击左侧 **Edge Functions**
 3. 点击 **Create a new function**
 
