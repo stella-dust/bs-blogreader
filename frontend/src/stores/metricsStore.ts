@@ -151,7 +151,12 @@ export const useMetricsStore = create<MetricsStore>((set, get) => ({
 }))
 
 // Utility functions for token estimation
-export const estimateTokens = (text: string): number => {
+export const estimateTokens = (text: string | undefined | null): number => {
+  // Handle undefined, null, or empty text
+  if (!text || typeof text !== 'string') {
+    return 0
+  }
+
   // Rough estimation: English text has about 4 characters per token on average
   // Chinese text has about 2.5 characters per token
   const hasChineseChars = /[\u4e00-\u9fff]/.test(text)

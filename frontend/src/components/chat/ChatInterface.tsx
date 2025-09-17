@@ -167,7 +167,17 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
 
   const handleSendMessage = async (messageContent: string) => {
     if (!hasContent) {
-      alert('Please fetch some content first to start chatting about it.')
+      // Add user message first
+      addMessage({
+        role: 'user',
+        content: messageContent
+      })
+
+      // Add a helpful response about needing content
+      addMessage({
+        role: 'assistant',
+        content: 'I\'d be happy to help you! However, I notice you haven\'t fetched any content yet. Please use the input box above to fetch an article or upload a file, then I can help you analyze and discuss it.'
+      })
       return
     }
 
@@ -242,121 +252,72 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
     startNewSession()
   }
 
-  // Empty state when no content is available
-  if (!hasContent) {
-    return (
-      <div className={className}>
-        <TabEmptyState
-          icon={<MessageCircle className="h-12 w-12" />}
-          title="No content to discuss"
-          description="Please fetch some content first, then you can start chatting about it with AI."
-        />
-      </div>
-    )
-  }
+  return (
+    <div className={`flex flex-col h-full ${className}`}>
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {messages.length === 0 ? (
+          // Welcome state
+          <div className="flex flex-col items-center justify-center h-full text-center">
+            <MessageCircle className="h-12 w-12 text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Start a conversation</h3>
+            <p className="text-sm text-gray-500 mb-6 max-w-sm">
+              {hasContent
+                ? "Ask questions about the content you've fetched. The AI will help you understand and analyze it."
+                : "Ask me anything! I can help you with general questions, or fetch some content first for specific analysis."
+              }
+            </p>
 
-  // Empty state when no messages
-  if (messages.length === 0) {
-    return (
-      <div className={className}>
-        <TabEmptyState
-          icon={<MessageCircle className="h-12 w-12" />}
-          title="Start a conversation"
-          description="Ask questions about the content you've fetched. The AI will help you understand and analyze it."
-          action={
-            <div className="space-y-3">
-              <div className="text-sm text-gray-500">
-                <strong>Try asking:</strong>
-              </div>
-              <div className="space-y-2 text-sm text-gray-600">
-                <div className="bg-gray-50 p-2 rounded">
+            {hasContent && (
+              <div className="space-y-2 text-sm text-gray-600 mb-4">
+                <div className="text-sm text-gray-500 mb-2">
+                  <strong>Try asking:</strong>
+                </div>
+                <div className="bg-gray-50 p-2 rounded text-left">
                   "What are the main points of this article?"
                 </div>
-                <div className="bg-gray-50 p-2 rounded">
+                <div className="bg-gray-50 p-2 rounded text-left">
                   "Can you explain this concept in simpler terms?"
                 </div>
-                <div className="bg-gray-50 p-2 rounded">
+                <div className="bg-gray-50 p-2 rounded text-left">
                   "What are the practical applications mentioned?"
                 </div>
               </div>
-              <ChatInput
-                onSendMessage={handleSendMessage}
-                disabled={isLoading}
-                placeholder="Ask your first question..."
-              />
-            </div>
-          }
-        />
-      </div>
-    )
-  }
+            )}
+          </div>
+        ) : (
+          // Messages
+          <div className="space-y-6">
+            {messages.map((message) => (
+              <MessageBubble key={message.id} message={message} />
+            ))}
 
-  return (
-    <div className={`flex flex-col h-full ${className}`}>
-      {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-gray-600" />
-          <span className="font-medium text-gray-900">
-            Chat about: {contentData?.title || 'Untitled'}
-          </span>
-        </div>
+            {isLoading && (
+              <div className="flex gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
+                  <Bot className="h-4 w-4 text-white" />
+                </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNewSession}
-            disabled={isLoading}
-          >
-            <RotateCcw className="h-4 w-4 mr-1" />
-            New
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearChat}
-            disabled={isLoading || messages.length === 0}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Clear
-          </Button>
-        </div>
-      </div>
-
-      {/* Processing Monitor */}
-      <CompactProcessingMonitor processType="chat" />
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
-        ))}
-
-        {isLoading && (
-          <div className="flex gap-3">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
-              <Bot className="h-4 w-4 text-white" />
-            </div>
-
-            <div className="flex-1">
-              <div className="inline-block px-4 py-3 bg-gray-100 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Thinking...</span>
+                <div className="flex-1">
+                  <div className="inline-block px-4 py-3 bg-gray-100 rounded-lg">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Thinking...</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="border-t border-gray-200 p-4">
+      {/* Input Area - Always at bottom */}
+      <div className="p-4 bg-white">
         <ChatInput
           onSendMessage={handleSendMessage}
           disabled={isLoading}
+          placeholder={hasContent ? "Ask about the content..." : "Ask me anything..."}
         />
       </div>
     </div>

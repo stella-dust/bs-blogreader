@@ -1,5 +1,39 @@
 # Changelog
 
+## [v0.3.0] - 2025-09-17
+
+### 🚀 重大 UI 升级：NotebookLM 风格模块化设计
+
+**界面架构重构**：
+- 🎨 **NotebookLM 风格布局**: 采用四列可折叠卡片设计
+- 📱 **智能自适应**: 支持列折叠，动态宽度分配
+- 🎛️ **模块化监控**: 实时显示各模块状态和 tokens 消耗
+- 🔄 **增强交互**: 提示词设计对话框，Markdown/源码切换
+
+**新增核心组件**：
+- 🏗️ `SmartFourColumnLayout`: 智能四列布局组件
+- 📊 `ModularMonitor`: 模块化状态监控器
+- ✏️ `EnhancedContentPanel`: 增强内容面板
+- 💬 `PromptEditDialog`: 提示词编辑对话框
+- 📁 `InputModule`: 支持文件上传的输入模块
+
+**用户体验优化**：
+- 📂 **文件上传功能**: 支持 .txt/.md/.json/.html 文件直接处理
+- 🎯 **实时状态跟踪**: Processing(时间+tokens) → Done(tokens+chars)
+- 🎨 **状态颜色区分**: Ready(灰色) / Processing(蓝色) / Done(绿色)
+- 🖼️ **图标优化**: 使用透明背景 PNG，修复 favicon 显示
+
+**技术改进**：
+- 🐛 **错误修复**: 解决 estimateTokens 报错和 CORS 问题
+- ⏱️ **超时优化**: 延长处理超时至 10 分钟
+- 📊 **Metrics 重构**: 完善 token 计数和字符统计
+- 🔄 **数据结构优化**: 兼容后端 result 字段格式
+
+**开发者友好**：
+- 🛠️ **流式输出支持**: 预留 StreamingContentPanel 组件
+- 📝 **TypeScript 优化**: 完善类型定义和错误处理
+- 🎛️ **环境配置**: 支持本地/生产环境 API 切换
+
 ## [v0.2.0] - 2025-01-16
 
 ### 🚀 重大架构升级：Supabase Edge Functions

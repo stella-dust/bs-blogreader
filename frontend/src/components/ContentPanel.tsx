@@ -94,12 +94,9 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
                 </ReactMarkdown>
               </div>
             ) : (
-              <textarea
-                className="w-full h-full resize-none border-none outline-none bg-transparent text-sm font-mono leading-relaxed break-all"
-                value={content}
-                readOnly
-                placeholder={isEmpty ? content : undefined}
-              />
+              <div className="w-full h-full text-sm font-mono leading-relaxed whitespace-pre-wrap break-all">
+                {content}
+              </div>
             )}
           </div>
         )}

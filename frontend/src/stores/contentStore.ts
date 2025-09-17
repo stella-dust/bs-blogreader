@@ -42,7 +42,7 @@ const defaultLlmConfig: LLMConfig = {
   model: 'deepseek-chat'
 }
 
-const defaultTranslationPrompt = `你是一位专业的技术翻译专家。请将用户提供的英文技术博客完整准确地翻译成中文。
+export const defaultTranslationPrompt = `你是一位专业的技术翻译专家。请将用户提供的英文技术博客完整准确地翻译成中文。
 
 翻译要求：
 1. 完整直译，保持原文的结构和格式
@@ -54,7 +54,7 @@ const defaultTranslationPrompt = `你是一位专业的技术翻译专家。请�
 
 请直接输出翻译内容，保持原文格式。`
 
-const defaultInterpretationPrompt = `你是一位专业的AI技术博客解读专家。请根据用户提供的英文技术博客内容，生成一篇500字以内的中文解读。
+export const defaultInterpretationPrompt = `你是一位专业的AI技术博客解读专家。请根据用户提供的英文技术博客内容，生成一篇500字以内的中文解读。
 
 解读要求：
 1. 忠于原文，不添加个人观点或推测

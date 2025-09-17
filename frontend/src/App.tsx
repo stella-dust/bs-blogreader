@@ -1,17 +1,13 @@
-import React, { useCallback, useEffect } from 'react'
-import { Github, Key, History, Settings } from 'lucide-react'
+import React, { useCallback, useState } from 'react'
+import { Github, Key, History } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TabCard, TabBadge, TabEmptyState } from '@/components/ui/tab-card'
-import { ModularLayout, SidebarLayout, StackLayout } from '@/components/layout/ModularLayout'
+import { SmartFourColumnLayout } from '@/components/layout/SmartFourColumnLayout'
 import { InputModule } from '@/components/input/InputModule'
-import { ChatInterface } from '@/components/chat/ChatInterface'
-import { ProcessingMonitor } from '@/components/monitoring/ProcessingMonitor'
 import { ApiKeyDialog } from '@/components/ApiKeyDialog'
 import { HistoryDropdown } from '@/components/HistoryDropdown'
-import { RichContentViewer } from '@/components/RichContentViewer'
-import { ContentPanel } from '@/components/ContentPanel'
-import { useContentStore, useUIStore, useMetricsStore } from '@/stores'
-import { estimateTokens } from '@/stores/metricsStore'
+import { LiveModularMonitor } from '@/components/monitoring/ModularMonitor'
+import { ModelValidationDialog, validateLLMConfig } from '@/components/ModelValidationDialog'
+import { useContentStore, useUIStore, useMetricsStore, estimateTokens } from '@/stores'
 import './index.css'
 
 function App() {
@@ -35,19 +31,19 @@ function App() {
   const {
     showApiDialog,
     showHistoryDropdown,
-    activeTab,
     setShowApiDialog,
-    setShowHistoryDropdown,
-    setActiveTab
+    setShowHistoryDropdown
   } = useUIStore()
+
+  // Local state for model validation dialog
+  const [showModelValidationDialog, setShowModelValidationDialog] = useState(false)
+  const [modelValidationMessage, setModelValidationMessage] = useState('')
 
   const {
     startProcess,
     endProcess,
-    updateProgress,
     setTokenCount,
-    setCharCount,
-    estimateTimeRemaining
+    setCharCount
   } = useMetricsStore()
 
   // Use Supabase for both local development and production
@@ -61,6 +57,7 @@ function App() {
 
   // Handle URL content fetching
   const handleUrlSubmit = useCallback(async (url: string) => {
+    console.log('Fetching URL:', url)
     setFetching(true)
     startProcess('fetch')
 
@@ -75,10 +72,13 @@ function App() {
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Fetch failed:', response.status, errorText)
         throw new Error(`Failed to fetch: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log('Fetched data:', data)
       setContentData(data)
 
       // Update metrics
@@ -94,9 +94,6 @@ function App() {
       }
       addToHistory(historyItem)
 
-      // Switch to original tab to show content
-      setActiveTab('original')
-
       endProcess('fetch')
     } catch (error) {
       console.error('Error fetching content:', error)
@@ -105,10 +102,11 @@ function App() {
     } finally {
       setFetching(false)
     }
-  }, [API_BASE_URL, setContentData, addToHistory, setFetching, startProcess, endProcess, setCharCount, setActiveTab])
+  }, [API_BASE_URL, setContentData, addToHistory, setFetching, startProcess, endProcess, setCharCount])
 
   // Handle file content processing
   const handleFileSubmit = useCallback(async (file: File) => {
+    console.log('Processing file:', file.name)
     setFetching(true)
     startProcess('fetch')
 
@@ -121,6 +119,7 @@ function App() {
         siteName: 'Local File'
       }
 
+      console.log('File data:', data)
       setContentData(data)
 
       // Update metrics
@@ -136,9 +135,6 @@ function App() {
       }
       addToHistory(historyItem)
 
-      // Switch to original tab
-      setActiveTab('original')
-
       endProcess('fetch')
     } catch (error) {
       console.error('Error processing file:', error)
@@ -147,11 +143,19 @@ function App() {
     } finally {
       setFetching(false)
     }
-  }, [setContentData, addToHistory, setFetching, startProcess, endProcess, setCharCount, setActiveTab])
+  }, [setContentData, addToHistory, setFetching, startProcess, endProcess, setCharCount])
 
   // Handle translation
   const handleTranslate = useCallback(async () => {
     if (!contentData?.content) return
+
+    // Validate LLM configuration first
+    const validation = validateLLMConfig(llmConfig)
+    if (!validation.isValid) {
+      setModelValidationMessage(validation.message)
+      setShowModelValidationDialog(true)
+      return
+    }
 
     setTranslating(true)
     startProcess('translation')
@@ -160,8 +164,9 @@ function App() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => {
         controller.abort()
-      }, 300000) // 5 minutes timeout
+      }, 600000) // 10 minutes timeout
 
+      // Set input tokens only at the start
       const inputTokens = estimateTokens(contentData.content)
       setTokenCount('translation', { input: inputTokens })
       setCharCount('translation', { input: contentData.content.length })
@@ -187,15 +192,13 @@ function App() {
       }
 
       const result = await response.json()
-      setProcessedData({ translation: result.processed_content })
+      const content = result.result || result.processed_content || ''
+      setProcessedData({ translation: content })
 
       // Update metrics
-      const outputTokens = estimateTokens(result.processed_content)
+      const outputTokens = estimateTokens(content)
       setTokenCount('translation', { output: outputTokens })
-      setCharCount('translation', { output: result.processed_content.length })
-
-      // Switch to translation tab
-      setActiveTab('translation')
+      setCharCount('translation', { output: content?.length || 0 })
 
       endProcess('translation')
     } catch (error: unknown) {
@@ -211,11 +214,19 @@ function App() {
     } finally {
       setTranslating(false)
     }
-  }, [contentData, llmConfig, setTranslating, setProcessedData, startProcess, endProcess, setTokenCount, setCharCount, setActiveTab, API_BASE_URL])
+  }, [contentData, llmConfig, setTranslating, setProcessedData, startProcess, endProcess, setTokenCount, setCharCount, API_BASE_URL])
 
   // Handle interpretation
   const handleInterpret = useCallback(async () => {
     if (!contentData?.content) return
+
+    // Validate LLM configuration first
+    const validation = validateLLMConfig(llmConfig)
+    if (!validation.isValid) {
+      setModelValidationMessage(validation.message)
+      setShowModelValidationDialog(true)
+      return
+    }
 
     setInterpreting(true)
     startProcess('interpretation')
@@ -224,8 +235,9 @@ function App() {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => {
         controller.abort()
-      }, 300000) // 5 minutes timeout
+      }, 600000) // 10 minutes timeout
 
+      // Set input tokens only at the start
       const inputTokens = estimateTokens(contentData.content)
       setTokenCount('interpretation', { input: inputTokens })
       setCharCount('interpretation', { input: contentData.content.length })
@@ -251,15 +263,13 @@ function App() {
       }
 
       const result = await response.json()
-      setProcessedData({ interpretation: result.processed_content })
+      const content = result.result || result.processed_content || ''
+      setProcessedData({ interpretation: content })
 
       // Update metrics
-      const outputTokens = estimateTokens(result.processed_content)
+      const outputTokens = estimateTokens(content)
       setTokenCount('interpretation', { output: outputTokens })
-      setCharCount('interpretation', { output: result.processed_content.length })
-
-      // Switch to interpretation tab
-      setActiveTab('interpretation')
+      setCharCount('interpretation', { output: content?.length || 0 })
 
       endProcess('interpretation')
     } catch (error: unknown) {
@@ -275,203 +285,87 @@ function App() {
     } finally {
       setInterpreting(false)
     }
-  }, [contentData, llmConfig, setInterpreting, setProcessedData, startProcess, endProcess, setTokenCount, setCharCount, setActiveTab, API_BASE_URL])
-
-  // Tab configuration
-  const tabs = [
-    {
-      id: 'original' as const,
-      label: 'Original',
-      icon: <div className="w-2 h-2 bg-blue-500 rounded-full" />,
-      content: contentData ? (
-        <RichContentViewer
-          content={contentData}
-          showSourceMode={true}
-        />
-      ) : (
-        <TabEmptyState
-          title="No content loaded"
-          description="Please fetch some content first"
-        />
-      ),
-      badge: contentData ? <TabBadge variant="success">Ready</TabBadge> : undefined
-    },
-    {
-      id: 'translation' as const,
-      label: 'Translation',
-      icon: <div className="w-2 h-2 bg-green-500 rounded-full" />,
-      content: processedData.translation ? (
-        <ContentPanel
-          title="Translation"
-          content={processedData.translation}
-          showSourceMode={true}
-        />
-      ) : (
-        <TabEmptyState
-          title="No translation available"
-          description="Click the translate button to generate translation"
-          action={
-            <Button
-              onClick={handleTranslate}
-              disabled={!contentData?.content || isTranslating}
-            >
-              Start Translation
-            </Button>
-          }
-        />
-      ),
-      badge: processedData.translation ? (
-        <TabBadge variant="success">Done</TabBadge>
-      ) : isTranslating ? (
-        <TabBadge variant="warning">Processing</TabBadge>
-      ) : undefined,
-      disabled: !contentData?.content
-    },
-    {
-      id: 'interpretation' as const,
-      label: 'Interpretation',
-      icon: <div className="w-2 h-2 bg-amber-500 rounded-full" />,
-      content: processedData.interpretation ? (
-        <ContentPanel
-          title="Interpretation"
-          content={processedData.interpretation}
-          showSourceMode={true}
-        />
-      ) : (
-        <TabEmptyState
-          title="No interpretation available"
-          description="Click the interpret button to generate interpretation"
-          action={
-            <Button
-              onClick={handleInterpret}
-              disabled={!contentData?.content || isInterpreting}
-            >
-              Start Interpretation
-            </Button>
-          }
-        />
-      ),
-      badge: processedData.interpretation ? (
-        <TabBadge variant="success">Done</TabBadge>
-      ) : isInterpreting ? (
-        <TabBadge variant="warning">Processing</TabBadge>
-      ) : undefined,
-      disabled: !contentData?.content
-    },
-    {
-      id: 'chat' as const,
-      label: 'Chat',
-      icon: <div className="w-2 h-2 bg-purple-500 rounded-full" />,
-      content: <ChatInterface className="h-96" />,
-      disabled: !contentData?.content
-    }
-  ]
+  }, [contentData, llmConfig, setInterpreting, setProcessedData, startProcess, endProcess, setTokenCount, setCharCount, API_BASE_URL])
 
   return (
-    <ModularLayout>
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            AI Blog Reader
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Intelligent content analysis and translation
-          </p>
-        </div>
+    <div className="h-screen bg-purple-50 flex flex-col overflow-hidden">
+      {/* Header Navigation - Fixed Height */}
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex-shrink-0">
+        <div className="flex justify-between items-center">
+          {/* Logo and Title */}
+          <div className="flex items-center gap-3">
+            <img src="/logo.jpg" alt="BuilderStream Logo" className="w-8 h-8 rounded-full object-cover" />
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">
+                BuilderStream | BlogReader
+              </h1>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-3">
-          {/* GitHub Link */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open('https://github.com/stella-dust/bs-blogreader', '_blank')}
-          >
-            <Github className="h-4 w-4 mr-1" />
-            GitHub
-          </Button>
+          {/* Right Side Icons */}
+          <div className="flex items-center gap-2">
+            {/* History Dropdown */}
+            <HistoryDropdown
+              history={history}
+              open={showHistoryDropdown}
+              onOpenChange={setShowHistoryDropdown}
+              trigger={
+                <Button variant="ghost" size="icon">
+                  <History className="h-4 w-4" />
+                </Button>
+              }
+            />
 
-          {/* History Dropdown */}
-          <HistoryDropdown
-            history={history}
-            open={showHistoryDropdown}
-            onOpenChange={setShowHistoryDropdown}
-            trigger={
-              <Button variant="outline" size="sm">
-                <History className="h-4 w-4 mr-1" />
-                History
-              </Button>
-            }
-          />
+            {/* API Key Dialog */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowApiDialog(true)}
+            >
+              <Key className="h-4 w-4" />
+            </Button>
 
-          {/* API Key Dialog */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowApiDialog(true)}
-          >
-            <Key className="h-4 w-4 mr-1" />
-            LLM Config
-          </Button>
+            {/* GitHub Link */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.open('https://github.com/stella-dust/bs-blogreader', '_blank')}
+            >
+              <Github className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
-      <SidebarLayout
-        sidebarPosition="right"
-        sidebarWidth="md"
-        main={
-          <StackLayout spacing="lg">
-            {/* Input Module */}
-            <InputModule
-              onUrlSubmit={handleUrlSubmit}
-              onFileSubmit={handleFileSubmit}
-              isProcessing={isFetching}
-            />
+      {/* Main Content Container - Flexible Height */}
+      <div className="flex-1 p-6 flex flex-col gap-6 min-h-0">
+        {/* Input Module Card - Fixed Height */}
+        <div className="bg-white rounded-xl p-6 flex-shrink-0 min-h-[120px] flex flex-col justify-center">
+          <InputModule
+            onUrlSubmit={handleUrlSubmit}
+            onFileSubmit={handleFileSubmit}
+            isProcessing={isFetching}
+          />
 
-            {/* Content Display with Tabs */}
-            <TabCard
-              title="Content Analysis"
-              subtitle={contentData?.title || "No content loaded"}
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              actions={
-                <div className="flex items-center gap-2">
-                  {contentData && (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleTranslate}
-                        disabled={isTranslating}
-                      >
-                        Translate
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleInterpret}
-                        disabled={isInterpreting}
-                      >
-                        Interpret
-                      </Button>
-                    </>
-                  )}
-                </div>
-              }
-            />
-          </StackLayout>
-        }
-        sidebar={
-          <StackLayout spacing="md">
-            {/* Processing Monitor */}
-            <ProcessingMonitor processType="fetch" />
-            <ProcessingMonitor processType="translation" />
-            <ProcessingMonitor processType="interpretation" />
-            <ProcessingMonitor processType="chat" />
-          </StackLayout>
-        }
-      />
+          {/* Modular Processing Monitor */}
+          <div className="mt-4">
+            <LiveModularMonitor onModelClick={() => setShowApiDialog(true)} />
+          </div>
+        </div>
+
+        {/* Four Column Smart Layout - Flexible Height */}
+        <div className="flex-1 min-h-0 bg-purple-50 rounded-xl -m-6 p-6">
+          <SmartFourColumnLayout
+            contentData={contentData}
+            processedData={processedData}
+            isFetching={isFetching}
+            isTranslating={isTranslating}
+            isInterpreting={isInterpreting}
+            onTranslate={handleTranslate}
+            onInterpret={handleInterpret}
+          />
+        </div>
+      </div>
 
       {/* Dialogs */}
       <ApiKeyDialog
@@ -480,7 +374,14 @@ function App() {
         open={showApiDialog}
         onOpenChange={setShowApiDialog}
       />
-    </ModularLayout>
+
+      <ModelValidationDialog
+        open={showModelValidationDialog}
+        onOpenChange={setShowModelValidationDialog}
+        onOpenApiKeyDialog={() => setShowApiDialog(true)}
+        message={modelValidationMessage}
+      />
+    </div>
   )
 }
 

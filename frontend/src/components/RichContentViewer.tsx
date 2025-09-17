@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { ExternalLink, Calendar, User, Globe } from 'lucide-react'
+import { ExternalLink, Calendar, User, Globe, FileText, Code } from 'lucide-react'
 import DOMPurify from 'dompurify'
 
 interface ContentData {
@@ -48,21 +48,44 @@ export const RichContentViewer: React.FC<RichContentViewerProps> = ({
   }
 
   const sanitizedHtml = contentData?.htmlContent
-    ? DOMPurify.sanitize(contentData.htmlContent, {
-        ALLOWED_TAGS: [
-          'p', 'div', 'span', 'br', 'strong', 'b', 'em', 'i', 'u',
-          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-          'ul', 'ol', 'li',
-          'a', 'img',
-          'blockquote', 'pre', 'code',
-          'table', 'thead', 'tbody', 'tr', 'td', 'th'
-        ],
-        ALLOWED_ATTR: [
-          'href', 'src', 'alt', 'title', 'target', 'rel',
-          'class', 'id'
-        ],
-        ALLOW_DATA_ATTR: false
-      })
+    ? (() => {
+        // Fix relative image URLs in HTML content
+        let processedHtml = contentData.htmlContent
+        if (contentData.url) {
+          try {
+            const baseUrl = new URL(contentData.url).origin
+            processedHtml = processedHtml.replace(
+              /<img([^>]*?)src=["'](?!https?:\/\/)([^"']+)["']/gi,
+              (match, attrs, src) => {
+                try {
+                  const absoluteUrl = new URL(src, contentData.url).href
+                  return `<img${attrs}src="${absoluteUrl}"`
+                } catch {
+                  return match // Keep original if URL construction fails
+                }
+              }
+            )
+          } catch {
+            // If base URL is invalid, keep original HTML
+          }
+        }
+
+        return DOMPurify.sanitize(processedHtml, {
+          ALLOWED_TAGS: [
+            'p', 'div', 'span', 'br', 'strong', 'b', 'em', 'i', 'u',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'ul', 'ol', 'li',
+            'a', 'img',
+            'blockquote', 'pre', 'code',
+            'table', 'thead', 'tbody', 'tr', 'td', 'th'
+          ],
+          ALLOWED_ATTR: [
+            'href', 'src', 'alt', 'title', 'target', 'rel',
+            'class', 'id'
+          ],
+          ALLOW_DATA_ATTR: false
+        })
+      })()
     : ''
 
   if (isLoading) {
@@ -88,84 +111,33 @@ export const RichContentViewer: React.FC<RichContentViewerProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      {/* 文章元信息头部 */}
-      <div className="border-b border-border p-4 flex-shrink-0 bg-gray-50/50">
-        <div className="space-y-2">
-          <h2 className="font-semibold text-lg leading-tight line-clamp-2">
-            {contentData.title}
-          </h2>
-
-          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-            {contentData.siteName && (
-              <div className="flex items-center gap-1">
-                <Globe className="h-3 w-3" />
-                <span>{contentData.siteName}</span>
-              </div>
-            )}
-
-            {contentData.author && (
-              <div className="flex items-center gap-1">
-                <User className="h-3 w-3" />
-                <span>{contentData.author}</span>
-              </div>
-            )}
-
-            {contentData.publishDate && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>{formatDate(contentData.publishDate)}</span>
-              </div>
-            )}
+      {/* 简化的文章信息和视图切换 */}
+      <div className="border-b border-gray-200 p-3 flex-shrink-0 bg-gray-50/30">
+        <div className="flex items-center justify-between">
+          {/* 文章标题 */}
+          <div className="flex-1 min-w-0 mr-3">
+            <h3 className="text-sm font-medium text-gray-900 truncate">
+              {contentData.title}
+            </h3>
           </div>
 
-          {contentData.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {contentData.description}
-            </p>
-          )}
-
-          <div className="flex items-center gap-2">
-            <a
-              href={contentData.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
-            >
-              <ExternalLink className="h-3 w-3" />
-              查看原文
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* 视图切换 */}
-      <div className="border-b border-border p-2 flex-shrink-0">
-        <div className="flex gap-1">
+          {/* 视图切换图标 */}
           <button
-            onClick={() => setViewMode('rich')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              viewMode === 'rich'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
+            onClick={() => setViewMode(viewMode === 'rich' ? 'text' : 'rich')}
+            className="p-1.5 rounded transition-colors text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            title={viewMode === 'rich' ? '切换到纯文本视图' : '切换到富文本视图'}
           >
-            富文本
-          </button>
-          <button
-            onClick={() => setViewMode('text')}
-            className={`px-3 py-1 text-xs rounded transition-colors ${
-              viewMode === 'text'
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            纯文本
+            {viewMode === 'rich' ? (
+              <Code className="h-3.5 w-3.5" />
+            ) : (
+              <FileText className="h-3.5 w-3.5" />
+            )}
           </button>
         </div>
       </div>
 
       {/* 内容区域 */}
-      <div className="flex-1 overflow-auto p-4 min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {viewMode === 'rich' && sanitizedHtml ? (
           <div
             className="prose prose-sm max-w-none dark:prose-invert break-words prose-img:max-w-full prose-img:h-auto prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline"
@@ -175,6 +147,20 @@ export const RichContentViewer: React.FC<RichContentViewerProps> = ({
               '--tw-prose-body': 'rgb(55 65 81)',
               '--tw-prose-links': 'rgb(37 99 235)',
             } as React.CSSProperties}
+            onError={(e) => {
+              // Handle image loading errors
+              const target = e.target as HTMLImageElement
+              if (target.tagName === 'IMG' && !target.dataset.errorHandled) {
+                target.dataset.errorHandled = 'true'
+                target.style.display = 'none'
+
+                // Create placeholder
+                const placeholder = document.createElement('div')
+                placeholder.className = 'bg-gray-100 border border-gray-200 rounded p-2 text-sm text-gray-500 text-center'
+                placeholder.innerHTML = `<div>📷 图片加载失败</div><div class="text-xs mt-1">${target.alt || 'Image'}</div>`
+                target.parentNode?.insertBefore(placeholder, target)
+              }
+            }}
           />
         ) : (
           <div className="whitespace-pre-wrap text-sm font-mono leading-relaxed break-all">

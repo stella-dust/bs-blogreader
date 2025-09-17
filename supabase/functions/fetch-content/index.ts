@@ -24,7 +24,7 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 }
 
-function extractMetadata(doc: Document): Partial<ContentData> {
+function extractMetadata(doc: Document, baseUrl: string): Partial<ContentData> {
   const metadata: Partial<ContentData> = {}
 
   // Extract title
@@ -60,7 +60,7 @@ function extractMetadata(doc: Document): Partial<ContentData> {
     const src = img.getAttribute('src')
     if (src && !src.startsWith('data:')) {
       try {
-        const imageSrc = src.startsWith('http') ? src : new URL(src, metadata.url || '').href
+        const imageSrc = src.startsWith('http') ? src : new URL(src, baseUrl).href
         images.push({
           src: imageSrc,
           alt: img.getAttribute('alt') || '',
@@ -68,7 +68,7 @@ function extractMetadata(doc: Document): Partial<ContentData> {
         })
       } catch (error) {
         // Skip invalid image URLs
-        console.warn('Invalid image URL:', src)
+        console.warn('Invalid image URL:', src, 'Base URL:', baseUrl)
       }
     }
   })
@@ -171,7 +171,7 @@ serve(async (req) => {
     }
 
     // Extract metadata
-    const metadata = extractMetadata(doc)
+    const metadata = extractMetadata(doc, url)
 
     // Extract main content
     const { content, htmlContent } = extractMainContent(doc)

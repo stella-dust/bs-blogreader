@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react'
-import { Search, Upload, Link, FileText, Loader2, AlertCircle } from 'lucide-react'
+import { Search, Upload, Loader2, X, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { InputCard } from '@/components/ui/collapsible-card'
-import { useContentStore, useUIStore } from '@/stores'
+import { useContentStore } from '@/stores'
 
 interface InputModuleProps {
   onUrlSubmit: (url: string) => void
@@ -16,41 +15,37 @@ export function InputModule({
   onFileSubmit,
   isProcessing = false
 }: InputModuleProps) {
-  const { inputMethod, setInputMethod } = useUIStore()
   const { isFetching } = useContentStore()
 
   const [url, setUrl] = useState('')
-  const [urlError, setUrlError] = useState('')
-  const [dragActive, setDragActive] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isLoading = isFetching || isProcessing
 
-  // URL validation
-  const validateUrl = (url: string): string => {
-    if (!url.trim()) return 'Please enter a URL'
-
-    try {
-      const urlObj = new URL(url)
-      if (!['http:', 'https:'].includes(urlObj.protocol)) {
-        return 'URL must start with http:// or https://'
-      }
-      return ''
-    } catch {
-      return 'Please enter a valid URL'
-    }
-  }
-
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const error = validateUrl(url)
-    if (error) {
-      setUrlError(error)
+    // If file is selected, submit file instead
+    if (selectedFile) {
+      onFileSubmit(selectedFile)
       return
     }
 
-    setUrlError('')
+    if (!url.trim()) return
+
+    // Basic URL validation
+    try {
+      const urlObj = new URL(url)
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        alert('URL must start with http:// or https://')
+        return
+      }
+    } catch {
+      alert('Please enter a valid URL')
+      return
+    }
+
     onUrlSubmit(url)
   }
 
@@ -59,174 +54,110 @@ export function InputModule({
 
     const file = files[0]
 
-    // Validate file type
-    const allowedTypes = [
-      'text/plain',
-      'text/markdown',
-      'application/json',
-      'text/html'
-    ]
-
+    // Basic file validation
     const allowedExtensions = ['.txt', '.md', '.json', '.html', '.htm']
     const hasValidExtension = allowedExtensions.some(ext =>
       file.name.toLowerCase().endsWith(ext)
     )
 
-    if (!allowedTypes.includes(file.type) && !hasValidExtension) {
+    if (!hasValidExtension) {
       alert('Please select a text file (.txt, .md, .json, .html)')
       return
     }
 
-    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       alert('File size must be less than 5MB')
       return
     }
 
-    onFileSubmit(file)
+    // Set selected file and show filename in input
+    setSelectedFile(file)
+    setUrl('') // Clear URL
   }
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleUrlChange = (value: string) => {
+    setUrl(value)
+    // Clear selected file when user types URL
+    if (selectedFile) {
+      setSelectedFile(null)
+    }
   }
 
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(true)
+  const clearFile = () => {
+    setSelectedFile(null)
+    setUrl('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-  }
+  return (
+    <div className="flex justify-center">
+      <div className="flex items-center gap-3 max-w-5xl w-full">
+        <form onSubmit={handleUrlSubmit} className="flex-1 flex items-center gap-2">
+          <div className="flex-1 relative">
+            {selectedFile ? (
+              // File display mode
+              <div className="flex items-center gap-2 px-3 py-2 border border-input rounded-md bg-background">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm truncate flex-1">{selectedFile.name}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFile}
+                  className="h-auto p-1 hover:bg-destructive/10"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              // URL input mode
+              <Input
+                type="url"
+                placeholder="输入文章链接或选择文件"
+                value={url}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                disabled={isLoading}
+                className="w-full"
+              />
+            )}
+          </div>
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    handleFileSelect(e.dataTransfer.files)
-  }
-
-  const InputMethodTabs = () => (
-    <div className="flex space-x-1 p-1 bg-gray-100 rounded-lg">
-      <button
-        onClick={() => setInputMethod('url')}
-        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-          inputMethod === 'url'
-            ? 'bg-white text-gray-900 shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
-      >
-        <Link className="h-4 w-4" />
-        URL
-      </button>
-      <button
-        onClick={() => setInputMethod('file')}
-        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-          inputMethod === 'file'
-            ? 'bg-white text-gray-900 shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
-        }`}
-      >
-        <Upload className="h-4 w-4" />
-        File
-      </button>
-    </div>
-  )
-
-  const urlContent = (
-    <form onSubmit={handleUrlSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <div className="flex space-x-2">
-          <Input
-            type="url"
-            placeholder="Enter article URL (e.g., https://example.com/article)"
-            value={url}
-            onChange={(e) => {
-              setUrl(e.target.value)
-              setUrlError('')
-            }}
-            className={urlError ? 'border-red-300 focus:border-red-500' : ''}
-            disabled={isLoading}
-          />
           <Button
             type="submit"
-            disabled={isLoading || !url.trim()}
-            className="px-6"
+            size="sm"
+            disabled={isLoading || (!url.trim() && !selectedFile)}
+            className="px-4"
           >
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Fetching...
+                处理中
+              </>
+            ) : selectedFile ? (
+              <>
+                <FileText className="h-4 w-4 mr-2" />
+                处理文件
               </>
             ) : (
               <>
                 <Search className="h-4 w-4 mr-2" />
-                Fetch
+                开始爬取
               </>
             )}
           </Button>
-        </div>
-
-        {urlError && (
-          <div className="flex items-center gap-2 text-sm text-red-600">
-            <AlertCircle className="h-4 w-4" />
-            {urlError}
-          </div>
-        )}
-      </div>
-
-      <div className="text-xs text-gray-500">
-        <p>Supports most blog sites, news articles, and documentation pages.</p>
-      </div>
-    </form>
-  )
-
-  const fileContent = (
-    <div className="space-y-4">
-      <div
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          dragActive
-            ? 'border-blue-400 bg-blue-50'
-            : 'border-gray-300 hover:border-gray-400'
-        }`}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-      >
-        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-
-        <div className="space-y-2">
-          <p className="text-lg font-medium text-gray-900">
-            Drop your file here
-          </p>
-          <p className="text-sm text-gray-500">
-            or click to browse
-          </p>
-        </div>
+        </form>
 
         <Button
           variant="outline"
+          size="sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={isLoading}
-          className="mt-4"
+          className="px-4"
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <Upload className="h-4 w-4 mr-2" />
-              Choose File
-            </>
-          )}
+          <Upload className="h-4 w-4 mr-2" />
+          上传文件
         </Button>
 
         <input
@@ -238,22 +169,6 @@ export function InputModule({
           disabled={isLoading}
         />
       </div>
-
-      <div className="text-xs text-gray-500">
-        <p>Supported formats: .txt, .md, .json, .html (max 5MB)</p>
-      </div>
     </div>
-  )
-
-  return (
-    <InputCard
-      title="Content Input"
-      subtitle="Start by entering a URL or uploading a file"
-      actions={<InputMethodTabs />}
-      defaultCollapsed={false}
-      className="w-full"
-    >
-      {inputMethod === 'url' ? urlContent : fileContent}
-    </InputCard>
   )
 }
