@@ -94,17 +94,15 @@ function App() {
 请直接输出解读内容，不需要额外的格式或前缀。`
   )
 
-  // Use FastAPI backend for local development, Supabase for production
-  const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-    ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
-    : 'http://localhost:8001'
+  // Use Supabase for both local development and production
+  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL
+    ? import.meta.env.VITE_SUPABASE_URL
+    : 'http://localhost:54321'
 
-  // Use different endpoints based on environment
-  const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
   const API_ENDPOINTS = {
-    fetchContent: isLocalDev ? '/api/fetch-content' : '/functions/v1/fetch-content',
-    process: isLocalDev ? '/api/process' : '/functions/v1/process',
-    testConfig: isLocalDev ? '/api/test-llm-config' : '/functions/v1/test-llm-config'
+    fetchContent: '/functions/v1/fetch-content',
+    process: '/functions/v1/process',
+    testConfig: '/functions/v1/test-llm-config'
   }
 
   const handleFetchContent = async () => {
@@ -116,12 +114,15 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({ url }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch content')
+        const errorData = await response.text()
+        console.error('Fetch failed:', response.status, errorData)
+        throw new Error(`Failed to fetch content: ${response.status} - ${errorData}`)
       }
 
       const data = await response.json()
@@ -143,6 +144,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({
           content: contentData.content,
@@ -177,6 +179,7 @@ function App() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({
           content: contentData.content,

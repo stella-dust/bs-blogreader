@@ -3,7 +3,6 @@
 project_id = "bs-blogreader"
 
 [api]
-enabled = true
 # Port to use for the API URL.
 port = 54321
 # Schemas to expose in your API. Tables, views and stored procedures in this schema will get API endpoints.
@@ -15,32 +14,26 @@ extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
-enabled = true
 # Port to use for the local database URL.
 port = 54322
-# External query timeout.
-query_timeout = "10m"
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW server_version;` on the remote database to check.
+major_version = 15
 
 [studio]
-enabled = true
 # Port to use for Supabase Studio.
 port = 54323
+# External URL of the API server that frontend connects to.
+api_url = "http://localhost:54321"
 
 [inbucket]
-enabled = true
 # Port to use for the email testing server web interface.
 port = 54324
-# Uncomment to expose additional ports for testing user applications that send emails.
-# smtp_port = 54325
-# pop3_port = 54326
 
 [storage]
-enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
 file_size_limit = "50MiB"
 
 [auth]
-enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
 site_url = "http://localhost:3000"
@@ -54,24 +47,18 @@ enable_signup = true
 [auth.email]
 # Allow/disallow new user signups via email to your project.
 enable_signup = true
-# If enabled, a user will be required to confirm any email change on both the old, and new email addresses. If disabled, only the new email is required to confirm.
-double_confirm_change = true
 # If enabled, users need to confirm their email address before signing in.
 enable_confirmations = false
 
-# Use pre-defined map of claims
-[auth.jwt]
-[auth.jwt.claims]
-aud = "authenticated"
-exp = 0
-sub = ""
-
-[edge_runtime]
-enabled = true
-# Configure one of the supported poolers. The connection string is constructed using the config vars.
-# Choose the pooler mode. Options are `transaction` or `session`.
-pooler_mode = "transaction"
-# Port to use for the Edge Runtime API.
-port = 54325
-# IP version to use for the Edge Runtime API.
-ip_version = "ipv4"
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
+# `twitter`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
+enabled = false
+client_id = ""
+secret = ""
+# Overrides the default auth redirectURL.
+redirect_uri = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""

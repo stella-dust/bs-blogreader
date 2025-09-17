@@ -62,18 +62,14 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
     setTestMessage('正在测试连接...')
 
     try {
-      // Use FastAPI backend for local development, Supabase for production
-      const API_BASE_URL = typeof window !== 'undefined' && window.location.hostname !== 'localhost'
-        ? (import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co')
-        : 'http://localhost:8001'
+      // Use Supabase for both local development and production
+      const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321'
 
-      const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-      const testEndpoint = isLocalDev ? '/api/test-llm-config' : '/functions/v1/test-llm-config'
-
-      const response = await fetch(`${API_BASE_URL}${testEndpoint}`, {
+      const response = await fetch(`${API_BASE_URL}/functions/v1/test-llm-config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'}`,
         },
         body: JSON.stringify({ llm_config: tempConfig }),
       })

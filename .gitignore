@@ -15,6 +15,7 @@ backend/build/
 .env
 .env.local
 .env.production
+!.env.proxy
 .venv/
 venv/
 

@@ -58,11 +58,17 @@ function extractMetadata(doc: Document): Partial<ContentData> {
   imgElements.forEach((img) => {
     const src = img.getAttribute('src')
     if (src && !src.startsWith('data:')) {
-      images.push({
-        src: src.startsWith('http') ? src : new URL(src, metadata.url || '').href,
-        alt: img.getAttribute('alt') || '',
-        title: img.getAttribute('title') || ''
-      })
+      try {
+        const imageSrc = src.startsWith('http') ? src : new URL(src, metadata.url || '').href
+        images.push({
+          src: imageSrc,
+          alt: img.getAttribute('alt') || '',
+          title: img.getAttribute('title') || ''
+        })
+      } catch (error) {
+        // Skip invalid image URLs
+        console.warn('Invalid image URL:', src)
+      }
     }
   })
   if (images.length > 0) metadata.images = images.slice(0, 10) // Limit to 10 images
