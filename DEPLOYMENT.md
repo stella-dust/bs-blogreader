@@ -11,7 +11,7 @@
 ### 1. 部署 Supabase Edge Functions
 
 #### 方法 A: 通过 Supabase Dashboard (推荐)
-1. 访问：https://supabase.com/dashboard/project/oqicgfaczdmrdogikqzi
+1. 访问：https://supabase.com/dashboard/project/oqicgfaczdmrdoglkqzi
 2. 进入 **Edge Functions**
 3. 创建以下三个函数：
 
@@ -55,7 +55,7 @@ supabase functions deploy test-llm-config
 #### 环境变量配置
 在 Cloudflare Pages 设置中添加：
 ```
-VITE_SUPABASE_URL=https://oqicgfaczdmrdogikqzi.supabase.co
+VITE_SUPABASE_URL=https://oqicgfaczdmrdoglkqzi.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xaWNnZmFjemRtcmRvZ2xrcXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMzAyMzUsImV4cCI6MjA3MzYwNjIzNX0.mXWZ-YA2oiQ2LX8o_lePm3gkXdl5VdhmZEi262jn6Ss
 ```
 
@@ -79,7 +79,7 @@ Target: [cloudflare-pages-url].pages.dev
 创建 `frontend/.env.production`：
 ```bash
 # 生产环境配置
-VITE_SUPABASE_URL=https://oqicgfaczdmrdogikqzi.supabase.co
+VITE_SUPABASE_URL=https://oqicgfaczdmrdoglkqzi.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xaWNnZmFjemRtcmRvZ2xrcXppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMzAyMzUsImV4cCI6MjA3MzYwNjIzNX0.mXWZ-YA2oiQ2LX8o_lePm3gkXdl5VdhmZEi262jn6Ss
 ```
 
