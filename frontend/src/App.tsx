@@ -140,6 +140,12 @@ function App() {
 
     setIsTranslating(true)
     try {
+      // 创建超时控制器 - 2分钟超时
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        controller.abort()
+      }, 120000) // 120秒
+
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
@@ -151,7 +157,10 @@ function App() {
           prompt: translationPrompt,
           llm_config: llmConfig
         }),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error('Translation failed')
@@ -163,7 +172,11 @@ function App() {
         translation: data.result
       }))
     } catch (error) {
-      console.error('Translation failed:', error)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Translation timeout - content may be too long')
+      } else {
+        console.error('Translation failed:', error)
+      }
     } finally {
       setIsTranslating(false)
     }
@@ -175,6 +188,12 @@ function App() {
 
     setIsInterpreting(true)
     try {
+      // 创建超时控制器 - 2分钟超时
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => {
+        controller.abort()
+      }, 120000) // 120秒
+
       const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.process}`, {
         method: 'POST',
         headers: {
@@ -186,7 +205,10 @@ function App() {
           prompt: interpretationPrompt,
           llm_config: llmConfig
         }),
+        signal: controller.signal
       })
+
+      clearTimeout(timeoutId)
 
       if (!response.ok) {
         throw new Error('Interpretation failed')
@@ -198,7 +220,11 @@ function App() {
         interpretation: data.result
       }))
     } catch (error) {
-      console.error('Interpretation failed:', error)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('Interpretation timeout - content may be too long')
+      } else {
+        console.error('Interpretation failed:', error)
+      }
     } finally {
       setIsInterpreting(false)
     }

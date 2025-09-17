@@ -19,11 +19,11 @@ interface ApiKeyDialogProps {
 }
 
 const LLM_TYPES = [
-  { value: 'deepseek' as const, label: 'DeepSeek', placeholder: '请输入您的 DeepSeek API Key', defaultBaseURL: 'https://api.deepseek.com' },
-  { value: 'openai' as const, label: 'OpenAI', placeholder: '请输入您的 OpenAI API Key', defaultBaseURL: 'https://api.openai.com/v1' },
-  { value: 'claude' as const, label: 'Claude', placeholder: '请输入您的 Anthropic API Key', defaultBaseURL: 'https://api.anthropic.com' },
-  { value: 'ollama' as const, label: 'Ollama (本地)', placeholder: '无需 API Key', defaultBaseURL: 'http://localhost:11434' },
-  { value: 'lmstudio' as const, label: 'LM Studio (本地)', placeholder: '无需 API Key', defaultBaseURL: 'http://localhost:1234/v1' },
+  { value: 'deepseek' as const, label: 'DeepSeek (推荐-快速)', placeholder: '请输入您的 DeepSeek API Key', defaultBaseURL: 'https://api.deepseek.com', defaultModel: 'deepseek-chat' },
+  { value: 'openai' as const, label: 'OpenAI', placeholder: '请输入您的 OpenAI API Key', defaultBaseURL: 'https://api.openai.com/v1', defaultModel: 'gpt-3.5-turbo' },
+  { value: 'claude' as const, label: 'Claude (较慢)', placeholder: '请输入您的 Anthropic API Key', defaultBaseURL: 'https://api.anthropic.com', defaultModel: 'claude-3-haiku-20240307' },
+  { value: 'ollama' as const, label: 'Ollama (本地)', placeholder: '无需 API Key', defaultBaseURL: 'http://localhost:11434', defaultModel: 'llama3.1:8b' },
+  { value: 'lmstudio' as const, label: 'LM Studio (本地)', placeholder: '无需 API Key', defaultBaseURL: 'http://localhost:1234/v1', defaultModel: 'local-model' },
 ]
 
 export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDialogProps) {
@@ -41,11 +41,12 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
   }
 
   const handleTypeChange = (type: LLMConfig['type']) => {
-    const llmType = LLM_TYPES.find(t => t.value === type)!
+    const llmType = LLM_TYPES.find(t => t.value === type)! as any
     setTempConfig({
       ...tempConfig,
       type,
       baseURL: llmType.defaultBaseURL,
+      model: llmType.defaultModel,
       apiKey: requiresApiKey ? tempConfig.apiKey : ''
     })
     resetTestStatus()
@@ -173,7 +174,7 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
           <div>
             <label className="text-sm font-medium">模型 (可选)</label>
             <Input
-              placeholder="例如: gpt-4, deepseek-chat, llama2"
+              placeholder="例如: deepseek-chat (快), gpt-3.5-turbo (快), claude-3-haiku (快)"
               value={tempConfig.model || ''}
               onChange={(e) => {
                 setTempConfig({...tempConfig, model: e.target.value})
@@ -181,6 +182,9 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
               }}
               className="mt-2"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              💡 推荐使用较快的模型以避免超时：deepseek-chat, gpt-3.5-turbo, claude-3-haiku
+            </p>
           </div>
 
           {/* 测试按钮和状态 */}

@@ -2,6 +2,11 @@
 # Not used by the hosted Supabase platform.
 project_id = "bs-blogreader"
 
+[functions]
+# Edge Functions configuration
+# Timeout for function execution (in seconds)
+timeout = 120
+
 [api]
 # Port to use for the API URL.
 port = 54321
