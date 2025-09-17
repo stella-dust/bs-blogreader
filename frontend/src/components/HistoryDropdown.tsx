@@ -18,9 +18,10 @@ interface HistoryDropdownProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   trigger: React.ReactNode
+  onDownload?: (item: HistoryItem) => void
 }
 
-export function HistoryDropdown({ history, open, onOpenChange, trigger }: HistoryDropdownProps) {
+export function HistoryDropdown({ history, open, onOpenChange, trigger, onDownload }: HistoryDropdownProps) {
   const { setContentData } = useContentStore()
   const dropdownRef = useRef<HTMLDivElement>(null)
 

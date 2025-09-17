@@ -14,7 +14,7 @@ interface MetricItemProps {
   value: string | number
   suffix?: string
   isLoading?: boolean
-  variant?: 'default' | 'success' | 'warning' | 'info'
+  variant?: 'default' | 'success' | 'warning' | 'error'
 }
 
 function MetricItem({
@@ -29,7 +29,7 @@ function MetricItem({
     default: 'text-gray-600',
     success: 'text-green-600',
     warning: 'text-amber-600',
-    info: 'text-blue-600'
+    error: 'text-red-600'
   }
 
   return (
@@ -139,7 +139,7 @@ export function ProcessingMonitor({
 
     if (isActive) {
       return {
-        variant: 'info' as const,
+        variant: 'default' as const,
         status: 'Processing...',
         color: 'text-blue-600'
       }
@@ -209,7 +209,7 @@ export function ProcessingMonitor({
             icon={<Hash className="h-4 w-4" />}
             label="Tokens"
             value={totalTokens}
-            variant="info"
+            variant="default"
           />
         )}
 

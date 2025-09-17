@@ -77,7 +77,7 @@ export function ModularMonitor({ className, onModelClick }: ModularMonitorProps)
 
   // Module statuses
   const originalStatus = getModuleStatus(fetchMetrics, !!contentData)
-  const chatStatus = getModuleStatus(chatMetrics, chatMetrics.totalTokens > 0)
+  const chatStatus = getModuleStatus(chatMetrics, (chatMetrics.totalTokens || 0) > 0)
   const translationStatus = getModuleStatus(translationMetrics, !!processedData.translation)
   const interpretationStatus = getModuleStatus(interpretationMetrics, !!processedData.interpretation)
 
@@ -100,8 +100,8 @@ export function ModularMonitor({ className, onModelClick }: ModularMonitorProps)
     if (chatStatus === 'processing') {
       const time = formatDuration(Date.now() - (chatMetrics.startTime?.getTime() || Date.now()))
       details.push({ label: 'time:', value: time, color: 'text-blue-600' })
-      if (chatMetrics.totalTokens > 0) {
-        details.push({ label: 'tokens:', value: formatTokens(chatMetrics.totalTokens), color: 'text-blue-600' })
+      if ((chatMetrics.totalTokens || 0) > 0) {
+        details.push({ label: 'tokens:', value: formatTokens(chatMetrics.totalTokens || 0), color: 'text-blue-600' })
       }
     } else {
       details.push({ label: 'tokens:', value: formatTokens(chatMetrics.totalTokens || 0), color: 'text-blue-600' })
@@ -116,8 +116,8 @@ export function ModularMonitor({ className, onModelClick }: ModularMonitorProps)
     if (translationStatus === 'processing') {
       const time = formatDuration(Date.now() - (translationMetrics.startTime?.getTime() || Date.now()))
       details.push({ label: 'time:', value: time, color: 'text-green-600' })
-      if (translationMetrics.totalTokens > 0) {
-        details.push({ label: 'tokens:', value: formatTokens(translationMetrics.totalTokens), color: 'text-green-600' })
+      if ((translationMetrics.totalTokens || 0) > 0) {
+        details.push({ label: 'tokens:', value: formatTokens(translationMetrics.totalTokens || 0), color: 'text-green-600' })
       }
     } else if (translationStatus === 'done') {
       details.push({ label: 'tokens:', value: formatTokens(translationMetrics.totalTokens || 0), color: 'text-green-600' })
@@ -138,8 +138,8 @@ export function ModularMonitor({ className, onModelClick }: ModularMonitorProps)
     if (interpretationStatus === 'processing') {
       const time = formatDuration(Date.now() - (interpretationMetrics.startTime?.getTime() || Date.now()))
       details.push({ label: 'time:', value: time, color: 'text-purple-600' })
-      if (interpretationMetrics.totalTokens > 0) {
-        details.push({ label: 'tokens:', value: formatTokens(interpretationMetrics.totalTokens), color: 'text-purple-600' })
+      if ((interpretationMetrics.totalTokens || 0) > 0) {
+        details.push({ label: 'tokens:', value: formatTokens(interpretationMetrics.totalTokens || 0), color: 'text-purple-600' })
       }
     } else if (interpretationStatus === 'done') {
       details.push({ label: 'tokens:', value: formatTokens(interpretationMetrics.totalTokens || 0), color: 'text-purple-600' })

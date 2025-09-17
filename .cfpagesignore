@@ -1,0 +1,32 @@
+# Cloudflare Pages ignore file
+# 忽略开发相关文件避免不必要的部署触发
+
+# 开发和测试文件
+*.test.*
+*.spec.*
+__tests__/
+tests/
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+logs/
+
+# 开发配置
+.env.local
+.env.development
+.env.test
+
+# 备份文件
+*-backup.*
+*-fixed.*
+*-tab-version.*
+
+# 文档（如果不想在每次文档更新时触发部署）
+# *.md
+# docs/
