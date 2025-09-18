@@ -17,8 +17,8 @@ interface ChatSettingsStore {
 
 // Default settings
 const defaultSettings: ChatSettings = {
-  webSearchEnabled: true,        // 默认开启Web搜索
-  autoUrlFetch: true,           // 默认开启URL自动抓取
+  webSearchEnabled: false,       // 默认关闭Web搜索（用户可控）
+  autoUrlFetch: true,           // URL自动抓取始终开启
   searchDepth: 'basic',         // 默认基础搜索
   maxSearchResults: 3,          // 默认最多3个搜索结果
   showModeIndicator: true       // 默认显示模式指示器

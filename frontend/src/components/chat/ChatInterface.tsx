@@ -260,7 +260,7 @@ export function ChatInterface({ className }: ChatInterfaceProps) {
           // Welcome state
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Start a conversation</h3>
+            <h3 className="text-base font-medium text-gray-900 mb-2">Start a conversation</h3>
             <p className="text-sm text-gray-500 mb-6 max-w-sm">
               {hasContent
                 ? "Ask questions about the content you've fetched. The AI will help you understand and analyze it."

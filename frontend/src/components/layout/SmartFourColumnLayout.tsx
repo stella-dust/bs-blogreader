@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
-import { FileText, MessageCircle, Languages, Brain, RotateCcw } from 'lucide-react'
+import { FileText, MessageCircle, Languages, Brain, RotateCcw, Settings, Square, Search, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ContentCard, CollapsibleCard } from '@/components/ui/collapsible-card'
 import { RichContentViewer } from '@/components/RichContentViewer'
 import { EnhancedChatInterface } from '@/components/chat/EnhancedChatInterface'
+import { ServiceStatusIndicator } from '@/components/ServiceStatusIndicator'
+import { ChatSettingsPanel } from '@/components/ChatSettingsPanel'
 import { ContentPanel } from '@/components/ContentPanel'
 import { EnhancedContentPanel } from '@/components/EnhancedContentPanel'
 import { CompactProcessingMonitor } from '@/components/monitoring/ProcessingMonitor'
 import { useChatStore, useContentStore, defaultTranslationPrompt, defaultInterpretationPrompt } from '@/stores'
+import { useChatSettingsStore } from '@/stores/chatSettingsStore'
 import type { ContentData, ProcessedData } from '@/stores/types'
 
 interface SmartFourColumnLayoutProps {
@@ -29,7 +32,11 @@ export function SmartFourColumnLayout({
   onTranslate,
   onInterpret,
 }: SmartFourColumnLayoutProps) {
-  const { messages, startNewSession } = useChatStore()
+  const { messages, startNewSession, clearMessages } = useChatStore()
+  const { settings, toggleWebSearch } = useChatSettingsStore()
+  const [serviceStatus, setServiceStatus] = useState<'checking' | 'online' | 'offline' | 'error'>('checking')
+
+  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co'
   const {
     translationPrompt,
     interpretationPrompt,
@@ -103,7 +110,7 @@ export function SmartFourColumnLayout({
           ) : (
             <div className="text-center py-12 text-gray-500 h-full flex flex-col justify-center">
               <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-lg font-medium">No content available</p>
+              <p className="text-base font-medium">No content available</p>
               <p className="text-sm mt-1">Please fetch some content using the input above</p>
             </div>
           )}
@@ -115,16 +122,42 @@ export function SmartFourColumnLayout({
         <CollapsibleCard
           title="对话"
           icon={<MessageCircle className="h-4 w-4" />}
-          actions={messages.length > 0 ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={startNewSession}
-              className="h-8 w-8 p-0"
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          ) : null}
+          badge={
+            <ServiceStatusIndicator
+              apiBaseUrl={API_BASE_URL}
+              onStatusChange={setServiceStatus}
+              className="ml-1"
+            />
+          }
+          actions={
+            <div className="flex items-center gap-1">
+              {/* 刷新按钮 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearMessages}
+                disabled={messages.length === 0}
+                className="h-6 w-6 p-0 hover:bg-gray-200"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+
+              {/* 网络搜索开关 */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleWebSearch}
+                className={`h-6 w-6 p-0 hover:bg-gray-200 ${
+                  settings.webSearchEnabled
+                    ? 'text-blue-600'
+                    : 'text-gray-400'
+                }`}
+                title="网络搜索开关"
+              >
+                <Globe className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          }
           collapsible={false}
           direction="vertical"
           className="h-full"

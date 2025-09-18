@@ -86,7 +86,7 @@ export function ServiceStatusIndicator({ apiBaseUrl, className, onStatusChange }
 
   return (
     <div
-      className={`inline-flex items-center gap-1 px-2 py-1 border rounded-full text-xs font-medium ${config.color} ${className}`}
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 border rounded-full text-xs font-medium ${config.color} ${className}`}
       title={lastCheck ? `最后检查: ${lastCheck.toLocaleTimeString()}` : '正在检查服务状态...'}
     >
       {config.icon}

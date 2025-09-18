@@ -2,7 +2,7 @@ import React from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Button } from '@/components/ui/button'
-import { Copy, Download } from 'lucide-react'
+import { Copy, Download, FileText } from 'lucide-react'
 import { LoadingSpinner } from './LoadingSpinner'
 
 interface ContentPanelProps {
@@ -80,10 +80,10 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
         {isLoading ? (
           <LoadingSpinner message={loadingMessage} />
         ) : isEmpty ? (
-          <div className="flex items-center justify-center h-full text-muted-foreground p-4">
-            <div className="text-center">
-              <p className="text-sm">暂无内容</p>
-            </div>
+          <div className="text-center py-12 text-gray-500 h-full flex flex-col justify-center">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-base font-medium">No content available</p>
+            <p className="text-sm mt-1">Please fetch some content using the input above</p>
           </div>
         ) : (
           <div className="w-full h-full overflow-auto p-4">

@@ -147,13 +147,32 @@ export function CollapsibleCard({
         onClick={collapsible ? handleToggle : undefined}
       >
         {isCollapsed ? (
-          // Collapsed state: only show icon
-          <div className="flex items-center justify-center w-full">
-            {icon && (
-              <div className="flex-shrink-0 text-gray-600">
-                {icon}
-              </div>
-            )}
+          // Collapsed state: show icon and actions in compact layout
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3">
+              {icon && (
+                <div className="flex-shrink-0 text-gray-600">
+                  {icon}
+                </div>
+              )}
+              <h3 className="font-medium text-gray-800 text-base">
+                {title}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-2 flex-1 min-w-0 justify-between">
+              {actions && (
+                <div className="flex-1 min-w-0 mx-4">
+                  {actions}
+                </div>
+              )}
+
+              {collapsible && (
+                <div className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+                  <SidebarIcon isCollapsed={isCollapsed} />
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           // Expanded state: show full header
@@ -167,7 +186,7 @@ export function CollapsibleCard({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-medium text-gray-800 text-sm truncate">
+                  <h3 className="font-medium text-gray-800 text-base truncate">
                     {title}
                   </h3>
                   {badge && badge}

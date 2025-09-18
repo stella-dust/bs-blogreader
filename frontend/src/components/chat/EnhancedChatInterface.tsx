@@ -175,10 +175,23 @@ interface SmartChatInputProps {
   placeholder?: string
   predictedMode?: ProcessMode['type']
   confidence?: number
+  message: string
+  setMessage: (message: string) => void
+  onStop?: () => void
+  isProcessing?: boolean
 }
 
-function SmartChatInput({ onSendMessage, disabled, placeholder, predictedMode, confidence }: SmartChatInputProps) {
-  const [message, setMessage] = useState('')
+function SmartChatInput({
+  onSendMessage,
+  disabled,
+  placeholder,
+  predictedMode,
+  confidence,
+  message,
+  setMessage,
+  onStop,
+  isProcessing
+}: SmartChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const { settings } = useChatSettingsStore()
 
@@ -192,6 +205,10 @@ function SmartChatInput({ onSendMessage, disabled, placeholder, predictedMode, c
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto'
     }
+  }
+
+  const handleStop = () => {
+    onStop?.()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -210,44 +227,46 @@ function SmartChatInput({ onSendMessage, disabled, placeholder, predictedMode, c
   }, [message])
 
   return (
-    <div className="space-y-3">
-      {/* 智能输入指示器 */}
-      <SmartInputIndicator
-        input={message}
-        showDetails={message.trim().length > 3}
-      />
-
-      <form onSubmit={handleSubmit} className="flex gap-2 items-end">
-        <div className="flex-1 relative">
+    <div className="space-y-2">
+      <form onSubmit={handleSubmit} className="relative">
+        <div className="relative flex items-center bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 focus-within:border-gray-300 focus-within:shadow-md">
           <textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder || "询问关于这篇文章的任何问题，或粘贴链接让我帮你分析..."}
+            placeholder={placeholder || "询问本文的任何问题，或提供链接帮你分析..."}
             disabled={disabled}
-            className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg resize-none min-h-[44px] max-h-32 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+            className="flex-1 px-4 py-2 pr-12 bg-transparent border-none resize-none min-h-[40px] max-h-32 text-sm focus:outline-none disabled:opacity-50 placeholder:text-gray-500"
             rows={1}
+            style={{ height: 'auto' }}
           />
 
-          <div className="absolute right-2 bottom-2">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={!message.trim() || disabled}
-              className="h-8 w-8 p-0"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="absolute right-2">
+            {isProcessing ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleStop}
+                className="h-8 w-8 p-0 rounded-full bg-red-100 hover:bg-red-200 border-0 shadow-none transition-colors duration-150"
+                variant="ghost"
+              >
+                <Square className="h-4 w-4 text-red-600" />
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!message.trim() || disabled}
+                className="h-8 w-8 p-0 rounded-full bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:opacity-50 border-0 shadow-none transition-colors duration-150"
+                variant="ghost"
+              >
+                <Send className="h-4 w-4 text-gray-600" />
+              </Button>
+            )}
           </div>
         </div>
       </form>
-
-      {/* 简化提示 */}
-      <div className="text-center text-xs text-gray-500 mt-2">
-        <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs">Enter</kbd> 发送 •
-        <kbd className="px-1 py-0.5 bg-gray-100 border border-gray-300 rounded text-xs ml-1">Shift+Enter</kbd> 换行
-      </div>
     </div>
   )
 }
@@ -261,6 +280,7 @@ export function EnhancedChatInterface({ className }: EnhancedChatInterfaceProps)
   const [showSettings, setShowSettings] = useState(false)
   const [showFeatureHighlight, setShowFeatureHighlight] = useState(false)
   const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('checking')
+  const [message, setMessage] = useState('')
 
   const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co'
 
@@ -361,74 +381,6 @@ export function EnhancedChatInterface({ className }: EnhancedChatInterfaceProps)
 
   return (
     <div className={`flex flex-col h-full ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-blue-500" />
-          <h3 className="text-lg font-medium text-gray-900">智能对话</h3>
-          {hasContent && (
-            <span className="text-sm text-gray-500">• 基于当前文章</span>
-          )}
-          <ServiceStatusIndicator
-            apiBaseUrl={API_BASE_URL}
-            onStatusChange={setServiceStatus}
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* 快速设置切换 */}
-          <QuickSettingsToggle />
-
-          {/* 帮助按钮 */}
-          <SmartHelpButton
-            helpContent={
-              <div className="space-y-2">
-                <p><strong>智能对话功能：</strong></p>
-                <ul className="space-y-1 text-xs">
-                  <li>• 🔗 粘贴URL自动抓取内容分析</li>
-                  <li>• 🔍 检测搜索需求结合网络信息</li>
-                  <li>• 📚 基于原文进行深度问答</li>
-                  <li>• 📎 提供详细的引用来源</li>
-                </ul>
-                <p className="text-xs mt-2">
-                  智能模式会自动选择最佳处理方式。
-                </p>
-              </div>
-            }
-          />
-
-          {/* 设置按钮 */}
-          <ChatSettingsPanel
-            trigger={
-              <Button variant="ghost" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
-            }
-          />
-
-          {/* 清空按钮 */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClearChat}
-            disabled={messages.length === 0 && !isProcessing}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-
-          {/* 停止按钮 */}
-          {isProcessing && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={stopProcessing}
-              className="border-red-300 text-red-600 hover:bg-red-50"
-            >
-              <Square className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -436,46 +388,34 @@ export function EnhancedChatInterface({ className }: EnhancedChatInterfaceProps)
           // Welcome state
           <div className="flex flex-col items-center justify-center h-full text-center">
             <MessageCircle className="h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">开始智能对话</h3>
-            <p className="text-sm text-gray-500 mb-6 max-w-sm">
-              {hasContent
-                ? "问我关于这篇文章的任何问题，我会智能选择最佳方式为你解答。"
-                : "你可以问我任何问题，也可以粘贴链接让我帮你分析内容。"
-              }
-            </p>
+            <p className="text-base font-medium text-gray-500 mb-6">开始智能对话</p>
 
-            {hasContent && (
-              <div className="text-sm text-gray-500 mb-4">
-                <strong>试试问：</strong> "核心观点是什么？" 或 "有什么实际应用？"
-              </div>
-            )}
+            {/* 预设问题 */}
+            <div className="flex flex-col items-center space-y-2">
+              <button
+                onClick={() => setMessage("这篇博客的核心观点或结论是什么？")}
+                className="px-3 py-2 text-center text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full border transition-colors"
+              >
+                这篇博客的核心观点或结论是什么？
+              </button>
+              <button
+                onClick={() => setMessage("作者用了什么技术方法或原理？")}
+                className="px-3 py-2 text-center text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full border transition-colors"
+              >
+                作者用了什么技术方法或原理？
+              </button>
+              <button
+                onClick={() => setMessage("这对实际应用或未来发展意味着什么？")}
+                className="px-3 py-2 text-center text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-full border transition-colors"
+              >
+                这对实际应用或未来发展意味着什么？
+              </button>
+            </div>
 
             {/* 服务状态通知 */}
             {serviceStatus === 'offline' && (
-              <OfflineModeNotice className="max-w-lg mb-4" />
+              <OfflineModeNotice className="max-w-lg mt-4" />
             )}
-
-            {/* 功能亮点介绍 - 仅在服务正常时显示 */}
-            {showFeatureHighlight && serviceStatus === 'online' && (
-              <FeatureHighlight
-                features={[]}
-                onClose={() => {
-                  setShowFeatureHighlight(false)
-                  localStorage.setItem('chat-feature-highlight-seen', 'true')
-                }}
-                className="max-w-lg mb-4"
-              />
-            )}
-
-            {/* 简化功能说明 */}
-            <div className="bg-gray-50 p-3 rounded-lg text-center max-w-lg">
-              <div className="text-sm text-gray-600 mb-2">
-                🔗 智能URL抓取 • 🔍 Web搜索增强 • 📚 原文分析
-              </div>
-              <div className="text-xs text-gray-500">
-                自动选择最佳处理方式，提供准确引用
-              </div>
-            </div>
           </div>
         ) : (
           // Messages
@@ -530,6 +470,10 @@ export function EnhancedChatInterface({ className }: EnhancedChatInterfaceProps)
           disabled={isProcessing}
           predictedMode={predictedAnalysis.mode.type}
           confidence={predictedAnalysis.confidence}
+          message={message}
+          setMessage={setMessage}
+          onStop={stopProcessing}
+          isProcessing={isProcessing}
         />
       </div>
     </div>

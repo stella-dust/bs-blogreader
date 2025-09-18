@@ -39,6 +39,9 @@ function App() {
   const [showModelValidationDialog, setShowModelValidationDialog] = useState(false)
   const [modelValidationMessage, setModelValidationMessage] = useState('')
 
+  // Local state for input card collapsed state
+  const [isInputCollapsed, setIsInputCollapsed] = useState(false)
+
   const {
     startProcess,
     endProcess,
@@ -339,22 +342,47 @@ function App() {
 
       {/* Main Content Container - Flexible Height */}
       <div className="flex-1 p-6 flex flex-col gap-6 min-h-0">
-        {/* Input Module Card - Fixed Height */}
-        <div className="bg-white rounded-xl p-6 flex-shrink-0 min-h-[120px] flex flex-col justify-center">
-          <InputModule
-            onUrlSubmit={handleUrlSubmit}
-            onFileSubmit={handleFileSubmit}
-            isProcessing={isFetching}
-          />
+        {/* Input Module Card - Collapsible */}
+        <div className={`flex-shrink-0 transition-all duration-300 ${isInputCollapsed ? 'h-16' : 'min-h-[120px]'}`}>
+          <div className="bg-white rounded-xl h-full flex flex-col relative">
+            {/* Collapse button - Top right */}
+            <button
+              onClick={() => setIsInputCollapsed(!isInputCollapsed)}
+              className="absolute top-3 right-3 z-10 p-1 text-gray-400 hover:text-gray-600 transition-colors hover:bg-gray-100 rounded"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 1024 1024"
+                fill="currentColor"
+                style={{ transform: 'scale(1.1)' }}
+              >
+                <path d="M824.888889 170.666667H199.111111a56.888889 56.888889 0 0 0-56.888889 56.888889v568.888888a56.888889 56.888889 0 0 0 56.888889 56.888889h625.777778a56.888889 56.888889 0 0 0 56.888889-56.888889V227.555556a56.888889 56.888889 0 0 0-56.888889-56.888889z m0 597.333333a28.444444 28.444444 0 0 1-28.444445 28.444444H227.555556a28.444444 28.444444 0 0 1-28.444445-28.444444V256a28.444444 28.444444 0 0 1 28.444445-28.444444h568.888888a28.444444 28.444444 0 0 1 28.444445 28.444444z"></path>
+                <path d="M512 256m28.444444 0l227.555556 0q28.444444 0 28.444444 28.444444l0 455.111112q0 28.444444-28.444444 28.444444l-227.555556 0q-28.444444 0-28.444444-28.444444l0-455.111112q0-28.444444 28.444444-28.444444Z"></path>
+              </svg>
+            </button>
 
-          {/* Modular Processing Monitor */}
-          <div className="mt-4">
-            <LiveModularMonitor onModelClick={() => setShowApiDialog(true)} />
+            {/* Collapsible content */}
+            {!isInputCollapsed && (
+              <div className="p-6 pb-4 flex-shrink-0">
+                <InputModule
+                  onUrlSubmit={handleUrlSubmit}
+                  onFileSubmit={handleFileSubmit}
+                  isProcessing={isFetching}
+                />
+              </div>
+            )}
+
+            {/* Always visible monitor */}
+            <div className={`px-4 py-2 bg-white rounded-b-xl flex items-center ${isInputCollapsed ? 'rounded-xl justify-center flex-1' : ''}`}>
+              <div className="flex-1">
+                <LiveModularMonitor onModelClick={() => setShowApiDialog(true)} />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Four Column Smart Layout - Flexible Height */}
-        <div className="flex-1 min-h-0 bg-purple-50 rounded-xl -m-6 p-6">
+        <div className={`flex-1 min-h-0 bg-purple-50 rounded-xl -m-6 p-6 transition-all duration-300 ${isInputCollapsed ? '-mt-4' : ''}`}>
           <SmartFourColumnLayout
             contentData={contentData}
             processedData={processedData}
