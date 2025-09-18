@@ -22,6 +22,9 @@ export function ServiceStatusIndicator({ apiBaseUrl, className, onStatusChange }
       // Simple health check - try to fetch the health endpoint
       const response = await fetch(`${apiBaseUrl}/functions/v1/health`, {
         method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'fallback-key'}`
+        },
         signal: AbortSignal.timeout(3000) // 3 second timeout
       })
 
