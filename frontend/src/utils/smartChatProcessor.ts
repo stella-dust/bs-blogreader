@@ -71,7 +71,7 @@ export class SmartChatProcessor {
           return await this.handleWebSearch(analysis, blogId, blogContent)
 
         case 'rag_only':
-          return await this.handleRAGOnly(analysis, blogId)
+          return await this.handleRAGOnly(analysis, blogId, blogContent)
 
         default:
           throw new Error(`Unknown processing mode: ${analysis.mode.type}`)
@@ -353,7 +353,8 @@ ${fullContext}
    */
   private async handleRAGOnly(
     analysis: InputAnalysis,
-    blogId: string
+    blogId: string,
+    blogContent?: string
   ): Promise<ProcessResult> {
     try {
       console.log('📚 开始纯RAG模式', analysis.cleanQuestion)
@@ -365,7 +366,7 @@ ${fullContext}
       // 4. 提供引用信息
 
       // 暂时使用现有的聊天API
-      const response = await this.callCurrentChatAPI(analysis.cleanQuestion, blogId)
+      const response = await this.callCurrentChatAPI(analysis.cleanQuestion, blogId, blogContent)
 
       const message: EnhancedChatMessage = {
         id: `msg_${Date.now()}`,
@@ -424,7 +425,7 @@ ${fullContext}
   /**
    * 调用现有的聊天API（临时方案）
    */
-  private async callCurrentChatAPI(question: string, blogId: string) {
+  private async callCurrentChatAPI(question: string, blogId: string, blogContent?: string) {
     // 这里暂时调用现有的聊天接口
     // 后续会被新的RAG系统替换
     const response = await fetch(`${this.apiBaseUrl}/functions/v1/chat-with-content`, {
@@ -435,7 +436,7 @@ ${fullContext}
       },
       body: JSON.stringify({
         message: question,
-        context: '', // TODO: 传入实际的博客内容
+        context: blogContent || 'No blog content available',
         messages: [], // TODO: 传入对话历史
         llm_config: this.llmConfig
       })
