@@ -19,6 +19,6 @@ export default defineConfig({
   },
   define: {
     __API_URL__: JSON.stringify(process.env.VITE_API_URL || 'http://localhost:8001'),
-    __SUPABASE_URL__: JSON.stringify(process.env.VITE_SUPABASE_URL || 'http://localhost:54321')
+    __SUPABASE_URL__: JSON.stringify(process.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co')
   }
 })

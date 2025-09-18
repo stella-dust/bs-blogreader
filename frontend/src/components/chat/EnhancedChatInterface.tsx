@@ -262,7 +262,7 @@ export function EnhancedChatInterface({ className }: EnhancedChatInterfaceProps)
   const [showFeatureHighlight, setShowFeatureHighlight] = useState(false)
   const [serviceStatus, setServiceStatus] = useState<ServiceStatus>('checking')
 
-  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321'
+  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co'
 
   const {
     isProcessing,

@@ -47,7 +47,7 @@ function App() {
   } = useMetricsStore()
 
   // Use Supabase for both local development and production
-  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321'
+  const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co'
 
   const API_ENDPOINTS = {
     fetchContent: '/functions/v1/fetch-content',

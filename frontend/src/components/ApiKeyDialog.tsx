@@ -64,7 +64,7 @@ export function ApiKeyDialog({ llmConfig, onSave, open, onOpenChange }: ApiKeyDi
 
     try {
       // Use Supabase for both local development and production
-      const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'http://localhost:54321'
+      const API_BASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://oqicgfaczdmrdoglkqzi.supabase.co'
 
       const response = await fetch(`${API_BASE_URL}/functions/v1/test-llm-config`, {
         method: 'POST',

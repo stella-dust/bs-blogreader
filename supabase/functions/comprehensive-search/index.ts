@@ -282,7 +282,7 @@ ${context}
 请提供详细、准确的回答，并在引用特定信息时标明来源。如果原文内容和网络信息有冲突，请说明。`
 
     // 调用process函数来处理LLM请求
-    const processResponse = await fetch('http://localhost:54321/functions/v1/process', {
+    const processResponse = await fetch('https://oqicgfaczdmrdoglkqzi.supabase.co/functions/v1/process', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
