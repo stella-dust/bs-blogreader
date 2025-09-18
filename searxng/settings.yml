@@ -1,0 +1,152 @@
+# SearxNG Configuration for BlogReader
+# 专为博客阅读助手优化的搜索配置
+
+general:
+  debug: false
+  instance_name: "BlogReader Search"
+  contact_url: false
+  enable_metrics: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  autocomplete_min: 2
+  default_lang: "zh-CN"
+  languages:
+    - zh-CN
+    - en
+    - all
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  formats:
+    - html
+    - json
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  secret_key: "blogreader-searxng-secret-key-12345"
+  base_url: false
+  image_proxy: false
+  http_protocol_version: "1.1"
+  method: "POST"
+
+ui:
+  static_use_hash: false
+  default_locale: "zh-CN"
+  query_in_title: false
+  infinite_scroll: false
+  center_alignment: true
+  cache_url: "https://web.archive.org/web/"
+  search_on_category_select: true
+  hotkeys: default
+
+# Redis配置 (缓存)
+redis:
+  url: "redis://redis:6379/0"
+
+# 限流配置
+limiter: true
+botdetection:
+  ip_limit:
+    filter_link_local: false
+    link_token: false
+
+# 搜索引擎配置
+engines:
+  # Google搜索
+  - name: google
+    engine: google
+    shortcut: g
+    categories: [general, web]
+    language_support: true
+    paging: true
+    safesearch: true
+    time_range_support: true
+    use_mobile_ui: false
+
+  # Bing搜索
+  - name: bing
+    engine: bing
+    shortcut: b
+    categories: [general, web]
+    language_support: true
+    paging: true
+    safesearch: true
+    time_range_support: true
+
+  # DuckDuckGo搜索
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    categories: [general, web]
+    timeout: 3.0
+    disabled: false
+
+  # Startpage搜索
+  - name: startpage
+    engine: startpage
+    shortcut: sp
+    timeout: 6.0
+    categories: [general, web]
+    language_support: true
+    paging: true
+    safesearch: true
+    time_range_support: true
+
+  # Wikipedia (中文)
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    base_url: 'https://zh.wikipedia.org/'
+    categories: [general]
+    timeout: 5.0
+
+  # GitHub搜索
+  - name: github
+    engine: github
+    shortcut: gh
+    categories: [it]
+    timeout: 8.0
+
+  # Stack Overflow
+  - name: stackoverflow
+    engine: stackoverflow
+    shortcut: so
+    categories: [it, q&a]
+    timeout: 4.0
+
+  # 禁用一些不需要的引擎
+  - name: youtube
+    disabled: true
+  - name: twitter
+    disabled: true
+  - name: reddit
+    disabled: true
+
+# 类别配置
+categories_as_tabs:
+  general:
+    name: "通用"
+  it:
+    name: "技术"
+  "q&a":
+    name: "问答"
+
+# 默认类别
+default_category: general
+
+# 结果设置
+search:
+  autocomplete: ""
+  autocomplete_min: 2
+  default_lang: "zh-CN"
+
+# 输出格式
+outgoing:
+  request_timeout: 3.0
+  max_request_timeout: 15.0
+  useragent_suffix: "BlogReader/1.0"
+  pool_connections: 100
+  pool_maxsize: 20
+  enable_http2: true

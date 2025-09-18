@@ -1,15 +1,15 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ChatMessage } from './types'
+import type { ChatMessage, EnhancedChatMessage } from './types'
 
 interface ChatStore {
   // Chat data
-  messages: ChatMessage[]
+  messages: EnhancedChatMessage[]
   currentSessionId: string | null
   isLoading: boolean
 
   // Actions
-  addMessage: (message: Omit<ChatMessage, 'id' | 'timestamp'>) => void
+  addMessage: (message: Omit<EnhancedChatMessage, 'id' | 'timestamp'>) => EnhancedChatMessage
   clearMessages: () => void
   setLoading: (loading: boolean) => void
   startNewSession: () => void
@@ -26,7 +26,7 @@ export const useChatStore = create<ChatStore>()(
 
       // Actions
       addMessage: (message) => {
-        const newMessage: ChatMessage = {
+        const newMessage: EnhancedChatMessage = {
           id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           timestamp: new Date(),
           ...message,
@@ -35,6 +35,8 @@ export const useChatStore = create<ChatStore>()(
         set((state) => ({
           messages: [...state.messages, newMessage]
         }))
+
+        return newMessage
       },
 
       clearMessages: () => set({

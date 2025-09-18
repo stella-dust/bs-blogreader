@@ -4,14 +4,7 @@ compatibility_date = "2024-01-15"
 # Cloudflare Pages configuration
 pages_build_output_dir = "frontend/dist"
 
-[build]
-command = "cd frontend && npm run build"
-output = "frontend/dist"
-
-# 只在特定分支触发部署
-# 建议在 Cloudflare Pages 设置中配置只监听 main 分支或 release/* 分支
-
-[env.production.vars]
 # 生产环境变量将在Cloudflare Pages设置中配置
-# VITE_SUPABASE_URL = "https://your-project-ref.supabase.co"
+[env.production.vars]
+# VITE_SUPABASE_URL = "https://oqicgfaczdmrdoglkqzi.supabase.co"
 # VITE_SUPABASE_ANON_KEY = "your_anon_key_here"

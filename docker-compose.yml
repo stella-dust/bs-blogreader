@@ -31,6 +31,47 @@ services:
       timeout: 10s
       retries: 3
 
+  # SearxNG 元搜索引擎
+  searxng:
+    image: searxng/searxng:latest
+    container_name: blogreader-searxng
+    ports:
+      - "8080:8080"
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8080
+      - SEARXNG_SECRET_KEY=blogreader-searxng-secret-key-12345
+    volumes:
+      - ./searxng:/etc/searxng:ro
+    restart: unless-stopped
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis (SearxNG 缓存)
+  redis:
+    image: redis:7-alpine
+    container_name: blogreader-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 networks:
   default:
     name: blogreader-network
+
+volumes:
+  redis_data:
+    driver: local

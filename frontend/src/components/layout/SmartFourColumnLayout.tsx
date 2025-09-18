@@ -3,7 +3,7 @@ import { FileText, MessageCircle, Languages, Brain, RotateCcw } from 'lucide-rea
 import { Button } from '@/components/ui/button'
 import { ContentCard, CollapsibleCard } from '@/components/ui/collapsible-card'
 import { RichContentViewer } from '@/components/RichContentViewer'
-import { ChatInterface } from '@/components/chat/ChatInterface'
+import { EnhancedChatInterface } from '@/components/chat/EnhancedChatInterface'
 import { ContentPanel } from '@/components/ContentPanel'
 import { EnhancedContentPanel } from '@/components/EnhancedContentPanel'
 import { CompactProcessingMonitor } from '@/components/monitoring/ProcessingMonitor'
@@ -130,7 +130,7 @@ export function SmartFourColumnLayout({
           className="h-full"
         >
           <div className="h-full">
-            <ChatInterface />
+            <EnhancedChatInterface />
           </div>
         </CollapsibleCard>
       </div>

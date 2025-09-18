@@ -1,0 +1,69 @@
+# SearxNG Limiter Configuration for BlogReader
+# 为博客阅读助手配置的限流设置
+
+[botdetection]
+
+[botdetection.ip_limit]
+# 限制每个IP的请求频率
+window = 3600  # 时间窗口(秒)
+limit = 200    # 每小时最多200次请求
+filter_link_local = false
+
+[botdetection.ip_lists]
+# IP白名单 (本地开发)
+pass_ip = [
+  '127.0.0.1',
+  '::1',
+  '172.0.0.0/8',
+  '192.168.0.0/16',
+  '10.0.0.0/8'
+]
+
+# IP黑名单 (留空，按需添加)
+block_ip = []
+
+[botdetection.http_accept]
+# 允许的HTTP Accept头
+pass_detection = [
+  'application/json',
+  'text/html',
+  '*/*'
+]
+
+[botdetection.http_accept_encoding]
+# 允许的编码格式
+pass_detection = [
+  'gzip',
+  'deflate',
+  'br',
+  'identity'
+]
+
+[botdetection.http_accept_language]
+# 允许的语言
+pass_detection = [
+  'zh-CN',
+  'zh',
+  'en-US',
+  'en',
+  '*'
+]
+
+[botdetection.http_user_agent]
+# 允许的User-Agent
+pass_detection = [
+  'BlogReader',
+  'Mozilla',
+  'Chrome',
+  'Firefox',
+  'Safari',
+  'Edge'
+]
+
+# 阻止的User-Agent模式
+block_detection = [
+  'bot',
+  'crawler',
+  'spider',
+  'scraper'
+]
