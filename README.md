@@ -1,68 +1,64 @@
-# AI 博客解读助手
+# AI Blog Reader
 
-一个基于 AI 的博客解读工具，可以自动爬取网页内容，进行中文翻译和智能解读。
+An intelligent blog reading assistant powered by AI that can automatically crawl web content, provide high-quality translations, and generate smart analysis.
 
-![项目演示](./frontend/public/blogreader.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 
-## 🚀 功能特性
+## ✨ Features
 
-- **智能爬取**: 自动提取网页正文内容
-- **多 LLM 支持**: DeepSeek、OpenAI、Claude、Ollama、LM Studio
-- **AI 翻译**: 高质量的中英文翻译
-- **智能解读**: AI 分析文章核心要点
-- **文件导入**: 支持上传本地 Markdown/文本文件
-- **内容导出**: 支持复制内容和下载为文件
+- 🔍 **Smart Web Scraping**: Automatically extract main content from web pages
+- 🤖 **Multi-LLM Support**: DeepSeek, OpenAI, Claude, Ollama, LM Studio
+- 🌐 **AI Translation**: High-quality Chinese-English translation
+- 📖 **Intelligent Analysis**: AI-powered content summarization and insights
+- 📁 **File Upload**: Support for Markdown and text file import
+- 💾 **Content Export**: Copy content or download as files
+- 🔄 **Smart Chat**: Interactive Q&A with imported content
+- 🔍 **Web Search**: Comprehensive search with multiple sources
 
-## 🛠️ 技术栈
+## 🚀 Quick Start
 
-- **前端**: React 18 + TypeScript + Vite + Tailwind CSS
-- **后端**: Supabase Edge Functions / FastAPI
-- **AI 服务**: 多 LLM 支持
-- **部署**: Cloudflare Pages / Docker
-
-## 📦 快速开始
-
-### 本地开发
-
+### Docker (Recommended)
 ```bash
-# 克隆项目
 git clone https://github.com/your-username/bs-blogreader.git
 cd bs-blogreader
-
-# 安装前端依赖
-cd frontend
-npm install
-npm run dev
-
-# 启动后端 (另一个终端)
-cd backend
-pip install -r requirements.txt
-python llm_main.py
-```
-
-### Docker 部署
-
-```bash
 docker-compose up -d
 ```
 
-## 🔧 配置
+### Local Development
+```bash
+# Frontend
+cd frontend && npm install && npm run dev
 
-1. 设置 LLM API Key (DeepSeek/OpenAI/Claude) 或配置本地 LLM (Ollama/LM Studio)
-2. 在应用中点击钥匙图标进行配置
-3. 测试连接确保配置正确
+# Backend (if using local FastAPI)
+cd backend && pip install -r requirements.txt && python llm_main.py
+```
 
-## 📖 使用指南
+## 🔧 Configuration
 
-1. 输入网页 URL 或上传文件
-2. 点击"开始爬取"获取内容
-3. 使用"开始翻译"和"开始解读"进行 AI 处理
-4. 查看结果并导出内容
+1. Click the key icon to configure your LLM API settings
+2. Choose from cloud APIs (DeepSeek/OpenAI/Claude) or local models (Ollama/LM Studio)
+3. Test connectivity to ensure proper setup
 
-## 🤝 贡献
+## 🛠️ Tech Stack
 
-欢迎提交 Issue 和 Pull Request！
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS
+- **Backend**: Supabase Edge Functions, FastAPI
+- **AI**: Multiple LLM providers
+- **Deploy**: Cloudflare Pages, Docker
 
-## 📄 许可证
+## 📖 Usage
+
+1. Enter a URL or upload a file
+2. Click "Start Crawling" to extract content
+3. Use "Translate" and "Analyze" for AI processing
+4. Export or interact with the results
+
+## 🤝 Contributing
+
+Issues and Pull Requests are welcome!
+
+## 📄 License
 
 MIT License
